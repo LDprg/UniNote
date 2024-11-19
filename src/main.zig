@@ -2,7 +2,15 @@ const std = @import("std");
 const protobuf = @import("protobuf");
 
 const cairo = @cImport(@cInclude("cairo/cairo.h"));
-const sdl = @cImport(@cInclude("SDL3/SDL.h"));
+const imgui = @cImport({
+    @cInclude("SDL3/SDL.h");
+    @cDefine("CIMGUI_USE_SDL3", "TRUE");
+    @cDefine("CIMGUI_DEFINE_ENUMS_AND_STRUCTS", "TRUE");
+    @cInclude("cimgui.h");
+    @cInclude("cimgui_impl.h");
+    @cInclude("cimgui_impl_sdlrenderer3.h");
+});
+const sdl = imgui;
 
 const test_pb = @import("proto/test.pb.zig");
 
@@ -23,7 +31,7 @@ pub fn main() !void {
         return;
     }
 
-    const window = sdl.SDL_CreateWindow("UniNote", x, y, sdl.SDL_WINDOW_OPENGL);
+    const window = sdl.SDL_CreateWindow("UniNote", x, y, sdl.SDL_WINDOW_VULKAN);
     defer sdl.SDL_DestroyWindow(window);
 
     if (window == null) {
@@ -39,6 +47,25 @@ pub fn main() !void {
         return;
     }
 
+    // imgui
+    _ = imgui.igCreateContext(null);
+    defer imgui.igDestroyContext(null);
+
+    var io: *imgui.struct_ImGuiIO = imgui.igGetIO();
+    io.ConfigFlags |= imgui.ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+    io.ConfigFlags |= imgui.ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
+
+    imgui.igStyleColorsDark(null);
+
+    _ = imgui.ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
+    defer imgui.ImGui_ImplSDL3_Shutdown();
+
+    _ = imgui.ImGui_ImplSDLRenderer3_Init(renderer);
+    defer imgui.ImGui_ImplSDLRenderer3_Shutdown();
+
+    _ = imgui.SDL_SetRenderVSync(renderer, 1);
+
+    // cairo init
     const texture = sdl.SDL_CreateTexture(renderer, sdl.SDL_PIXELFORMAT_ABGR32, sdl.SDL_TEXTUREACCESS_STREAMING, x, y);
     defer sdl.SDL_DestroyTexture(texture);
 
@@ -68,6 +95,7 @@ pub fn main() !void {
     cairo.cairo_rectangle(cairo_render, 100, 100, 200, 150);
     cairo.cairo_fill(cairo_render);
 
+    // protobuf
     const file = try std.fs.cwd().createFile(
         "test.bin",
         .{ .read = true },
@@ -85,34 +113,46 @@ pub fn main() !void {
 
     _ = try file.writeAll(data);
 
+    // compression
     const file2 = try std.fs.cwd().createFile(
-        "test.bin.zlib",
+        "test.bin.lz",
         .{ .read = true },
     );
     defer file2.close();
 
-    var comp = try std.compress.gzip.compressor(file2.writer(), .{});
+    var comp = try std.compress.zlib.compressor(file2.writer(), .{});
     _ = try comp.write(data);
     try comp.finish();
 
     var quit = false;
 
     while (!quit) {
-        var e: ?sdl.SDL_Event = undefined;
-        while (sdl.SDL_PollEvent(&e.?)) {
-            if (e.?.type == sdl.SDL_EVENT_QUIT) {
+        var e: sdl.SDL_Event = undefined;
+        while (sdl.SDL_PollEvent(&e)) {
+            _ = imgui.ImGui_ImplSDL3_ProcessEvent(&e);
+
+            if (e.type == sdl.SDL_EVENT_QUIT) {
                 quit = true;
             }
         }
 
+        _ = imgui.ImGui_ImplSDLRenderer3_NewFrame();
+        _ = imgui.ImGui_ImplSDL3_NewFrame();
+        _ = imgui.igNewFrame();
+
+        imgui.igShowDemoWindow(null);
+
         // Update the SDL texture with the Cairo surface
         _ = sdl.SDL_UpdateTexture(texture, null, @as([*]u8, @ptrCast(surface.*.pixels.?)), surface.*.pitch);
 
+        imgui.igRender();
+
         // Render the texture to the window
         _ = sdl.SDL_RenderClear(renderer);
-        _ = sdl.SDL_RenderTexture(renderer, texture, null, null);
-        _ = sdl.SDL_RenderPresent(renderer);
 
-        sdl.SDL_Delay(16); // ~60 FPS
+        _ = sdl.SDL_RenderTexture(renderer, texture, null, null);
+        imgui.ImGui_ImplSDLRenderer3_RenderDrawData(imgui.igGetDrawData(), renderer);
+
+        _ = sdl.SDL_RenderPresent(renderer);
     }
 }

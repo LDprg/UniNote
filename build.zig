@@ -5,6 +5,14 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
+    const exe = b.addExecutable(.{
+        .name = "UniNote",
+        .root_source_file = b.path("src/main.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+
+    // protobuf
     const protobuf_dep = b.dependency("protobuf", .{
         .target = target,
         .optimize = optimize,
@@ -23,18 +31,34 @@ pub fn build(b: *std.Build) void {
 
     gen_proto.dependOn(&protoc_step.step);
 
-    const exe = b.addExecutable(.{
-        .name = "UniNote",
-        .root_source_file = b.path("src/main.zig"),
+    exe.root_module.addImport("protobuf", protobuf_dep.module("protobuf"));
+
+    // cimgui
+    const cimgui_dep = b.dependency("cimgui", .{
         .target = target,
         .optimize = optimize,
     });
+    exe.addIncludePath(cimgui_dep.path(""));
+    exe.addIncludePath(cimgui_dep.path("generator/output"));
+    exe.addIncludePath(cimgui_dep.path("imgui"));
+    exe.addIncludePath(cimgui_dep.path("imgui/backends"));
+    exe.addIncludePath(b.path("deps/override/"));
 
-    exe.root_module.addImport("protobuf", protobuf_dep.module("protobuf"));
+    exe.addCSourceFiles(.{
+        .root = cimgui_dep.path(""),
+        .flags = &.{"-DIMGUI_IMPL_API=extern \"C\""},
+        .files = &.{ "cimgui.cpp", "imgui/imgui.cpp", "imgui/imgui_widgets.cpp", "imgui/imgui_draw.cpp", "imgui/imgui_tables.cpp", "imgui/imgui_demo.cpp", "imgui/backends/imgui_impl_sdl3.cpp", "imgui/backends/imgui_impl_sdlrenderer3.cpp" },
+    });
 
+    // SDL3
     exe.linkSystemLibrary("SDL3");
+
+    // cairo
     exe.linkSystemLibrary("cairo");
+
+    // libc
     exe.linkLibC();
+    exe.linkLibCpp();
 
     b.installArtifact(exe);
 
