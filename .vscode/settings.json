@@ -1,6 +1,0 @@
-{
-    "files.associations": {
-        "cimgui_impl.h": "c",
-        "vulkan.h": "c"
-    }
-}
