@@ -1,9 +1,8 @@
 const std = @import("std");
-
-const sdl = @import("sdl/sdl3.zig");
-const cairo = @import("cairo/cairo.zig");
-
 const protobuf = @import("protobuf");
+
+const cairo = @cImport(@cInclude("cairo/cairo.h"));
+const sdl = @cImport(@cInclude("SDL3/SDL.h"));
 
 const test_pb = @import("proto/test.pb.zig");
 
@@ -79,7 +78,7 @@ pub fn main() !void {
     defer test_person.deinit();
 
     test_person.name = try protobuf.ManagedString.copy("test", alloc);
-    test_person.id = 123;
+    test_person.id = 0xFF;
 
     const data = try test_person.encode(alloc);
     defer alloc.free(data);

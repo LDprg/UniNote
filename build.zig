@@ -5,14 +5,27 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    const exe = b.addExecutable(.{
-        .name = "UniNote",
-        .root_source_file = b.path("src/main.zig"),
+    const protobuf_dep = b.dependency("protobuf", .{
         .target = target,
         .optimize = optimize,
     });
 
-    const protobuf_dep = b.dependency("protobuf", .{
+    const gen_proto = b.step("gen-proto", "generates zig files from protocol buffer definitions");
+
+    const protoc_step = protobuf.RunProtocStep.create(b, protobuf_dep.builder, target, .{
+        // out directory for the generated zig files
+        .destination_directory = b.path("src/proto"),
+        .source_files = &.{
+            "protocol/all.proto",
+        },
+        .include_directories = &.{},
+    });
+
+    gen_proto.dependOn(&protoc_step.step);
+
+    const exe = b.addExecutable(.{
+        .name = "UniNote",
+        .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
     });
@@ -32,18 +45,6 @@ pub fn build(b: *std.Build) void {
     }
 
     const run_step = b.step("run", "Run the app");
+    run_step.dependOn(gen_proto);
     run_step.dependOn(&run_cmd.step);
-
-    const gen_proto = b.step("gen-proto", "generates zig files from protocol buffer definitions");
-
-    const protoc_step = protobuf.RunProtocStep.create(b, protobuf_dep.builder, target, .{
-        // out directory for the generated zig files
-        .destination_directory = b.path("src/proto"),
-        .source_files = &.{
-            "protocol/all.proto",
-        },
-        .include_directories = &.{},
-    });
-
-    gen_proto.dependOn(&protoc_step.step);
 }
