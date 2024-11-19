@@ -1,2 +1,6 @@
 .zig-cache
 zig-out
+
+src/proto
+
+test.bin

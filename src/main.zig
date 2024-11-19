@@ -3,10 +3,19 @@ const std = @import("std");
 const sdl = @import("sdl/sdl3.zig");
 const cairo = @import("cairo/cairo.zig");
 
+const protobuf = @import("protobuf");
+
+const test_pb = @import("proto/test.pb.zig");
+
 const x = 640;
 const y = 480;
 
 pub fn main() !void {
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    defer _ = gpa.deinit();
+
+    const alloc = gpa.allocator();
+
     const init = sdl.SDL_Init(sdl.SDL_INIT_VIDEO);
     defer sdl.SDL_Quit();
 
@@ -41,7 +50,7 @@ pub fn main() !void {
     defer cairo.cairo_surface_destroy(cairo_surface);
 
     if (cairo_surface == null) {
-        std.debug.print("{s}\n", .{"Could not create cairo_surface!"});
+        std.debug.print("Could not create cairo_surface!\n", .{});
         return;
     }
 
@@ -49,7 +58,7 @@ pub fn main() !void {
     defer cairo.cairo_destroy(cairo_render);
 
     if (cairo_render == null) {
-        std.debug.print("{s}\n", .{"Could not create cairo_render!"});
+        std.debug.print("Could not create cairo_render!\n", .{});
         return;
     }
 
@@ -59,6 +68,23 @@ pub fn main() !void {
     cairo.cairo_set_source_rgb(cairo_render, 0.0, 0.0, 1.0);
     cairo.cairo_rectangle(cairo_render, 100, 100, 200, 150);
     cairo.cairo_fill(cairo_render);
+
+    const file = try std.fs.cwd().createFile(
+        "test.bin",
+        .{ .read = true },
+    );
+    defer file.close();
+
+    var test_person = test_pb.Person.init(alloc);
+    defer test_person.deinit();
+
+    test_person.name = try protobuf.ManagedString.copy("test", alloc);
+    test_person.id = 123;
+
+    const data = try test_person.encode(alloc);
+    defer alloc.free(data);
+
+    _ = try file.writeAll(data);
 
     var quit = false;
 
