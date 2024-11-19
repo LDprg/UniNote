@@ -77,13 +77,23 @@ pub fn main() !void {
     var test_person = test_pb.Person.init(alloc);
     defer test_person.deinit();
 
-    test_person.name = try protobuf.ManagedString.copy("test", alloc);
+    test_person.name = protobuf.ManagedString.static("test123");
     test_person.id = 0xFF;
 
     const data = try test_person.encode(alloc);
     defer alloc.free(data);
 
     _ = try file.writeAll(data);
+
+    const file2 = try std.fs.cwd().createFile(
+        "test.bin.zlib",
+        .{ .read = true },
+    );
+    defer file2.close();
+
+    var comp = try std.compress.gzip.compressor(file2.writer(), .{});
+    _ = try comp.write(data);
+    try comp.finish();
 
     var quit = false;
 

@@ -3,4 +3,4 @@ zig-out
 
 src/proto
 
-test.bin
+test.*
