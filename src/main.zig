@@ -12,6 +12,8 @@ const imgui = @cImport({
 });
 const sdl = imgui;
 
+const window = @import("window.zig");
+
 const test_pb = @import("proto/test.pb.zig");
 
 const x = 640;
@@ -23,23 +25,10 @@ pub fn main() !void {
 
     const alloc = gpa.allocator();
 
-    const init = sdl.SDL_Init(sdl.SDL_INIT_VIDEO);
-    defer sdl.SDL_Quit();
+    window.init(x, y);
+    defer window.deinit();
 
-    if (!init) {
-        std.debug.print("Could not init SDL3: {s}\n", .{sdl.SDL_GetError()});
-        return;
-    }
-
-    const window = sdl.SDL_CreateWindow("UniNote", x, y, sdl.SDL_WINDOW_VULKAN);
-    defer sdl.SDL_DestroyWindow(window);
-
-    if (window == null) {
-        std.debug.print("Could not create window: {s}\n", .{sdl.SDL_GetError()});
-        return;
-    }
-
-    const renderer = sdl.SDL_CreateRenderer(window, null);
+    const renderer = sdl.SDL_CreateRenderer(window.getNative(), null);
     defer sdl.SDL_DestroyRenderer(renderer);
 
     if (renderer == null) {
@@ -51,13 +40,13 @@ pub fn main() !void {
     _ = imgui.igCreateContext(null);
     defer imgui.igDestroyContext(null);
 
-    var io: *imgui.struct_ImGuiIO = imgui.igGetIO();
+    var io: *imgui.ImGuiIO = imgui.igGetIO();
     io.ConfigFlags |= imgui.ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
     io.ConfigFlags |= imgui.ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
 
     imgui.igStyleColorsDark(null);
 
-    _ = imgui.ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
+    _ = imgui.ImGui_ImplSDL3_InitForSDLRenderer(window.getNative(), renderer);
     defer imgui.ImGui_ImplSDL3_Shutdown();
 
     _ = imgui.ImGui_ImplSDLRenderer3_Init(renderer);
@@ -140,10 +129,10 @@ pub fn main() !void {
         _ = imgui.ImGui_ImplSDL3_NewFrame();
         _ = imgui.igNewFrame();
 
-        imgui.igShowDemoWindow(null);
-
         // Update the SDL texture with the Cairo surface
         _ = sdl.SDL_UpdateTexture(texture, null, @as([*]u8, @ptrCast(surface.*.pixels.?)), surface.*.pitch);
+
+        imgui.igShowDemoWindow(null);
 
         imgui.igRender();
 
