@@ -4,6 +4,7 @@ const window = @import("window.zig");
 const imgui = @import("imgui.zig");
 const cairo = @import("cairo.zig");
 const protobuf = @import("protobuf.zig");
+const event = @import("event.zig");
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
@@ -30,8 +31,9 @@ pub fn main() !void {
         while (window.getEvent()) |e| {
             imgui.processEvent(&e);
 
-            if (e.type == @intFromEnum(window.event.quit)) {
-                break :loop;
+            switch (@as(event.event, @enumFromInt(e.type))) {
+                event.event.quit => break :loop,
+                else => {},
             }
         }
 
