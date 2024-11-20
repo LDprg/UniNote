@@ -5,6 +5,8 @@ const c = @import("c.zig");
 var sdl_window: ?*c.SDL_Window = undefined;
 var sdl_renderer: ?*c.SDL_Renderer = undefined;
 
+pub const size = struct { x: i32, y: i32 };
+
 pub fn init(x: i32, y: i32) void {
     const sdL_init = c.SDL_Init(c.SDL_INIT_VIDEO);
 
@@ -42,4 +44,30 @@ pub fn getNativeWindow() ?*c.SDL_Window {
 
 pub fn getNativeRenderer() ?*c.SDL_Renderer {
     return sdl_renderer;
+}
+
+pub fn getEvent() ?c.SDL_Event {
+    var e: c.SDL_Event = undefined;
+
+    if (c.SDL_PollEvent(&e))
+        return e;
+
+    return null;
+}
+
+pub fn getSize() size {
+    var x: i32 = 0;
+    var y: i32 = 0;
+
+    _ = c.SDL_GetWindowSize(sdl_window, @ptrCast(&x), @ptrCast(&y));
+
+    return .{ .x = x, .y = y };
+}
+
+pub fn draw(drawFn: fn () void) void {
+    _ = c.SDL_RenderClear(sdl_renderer);
+
+    drawFn();
+
+    _ = c.SDL_RenderPresent(sdl_renderer);
 }

@@ -31,17 +31,17 @@ pub fn deinit() void {
     c.igDestroyContext(context);
 }
 
-pub fn processEvent(e: *c.SDL_Event) void {
+pub fn processEvent(e: *const c.SDL_Event) void {
     _ = c.ImGui_ImplSDL3_ProcessEvent(e);
 }
 
-pub fn nextFrame() void {
+pub fn update() void {
     _ = c.ImGui_ImplSDLRenderer3_NewFrame();
     _ = c.ImGui_ImplSDL3_NewFrame();
     _ = c.igNewFrame();
 }
 
-pub fn render() void {
+pub fn draw() void {
     c.igRender();
 
     c.ImGui_ImplSDLRenderer3_RenderDrawData(c.igGetDrawData(), window.getNativeRenderer());
