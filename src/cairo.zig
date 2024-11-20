@@ -34,7 +34,7 @@ pub fn init() !void {
     c.cairo_paint(cairo);
 
     c.cairo_set_source_rgb(cairo, 0.0, 0.0, 1.0);
-    c.cairo_rectangle(cairo, 100, 100, 200, 150);
+    c.cairo_rectangle(cairo, 100, 30, 200, 150);
     c.cairo_fill(cairo);
 }
 

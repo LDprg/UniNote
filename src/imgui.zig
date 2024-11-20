@@ -20,6 +20,14 @@ pub fn init() !void {
 
     _ = c.ImFontAtlas_AddFontFromFileTTF(io.Fonts, "res/FiraSans-Regular.ttf", 20, null, c.ImFontAtlas_GetGlyphRangesDefault(io.Fonts));
 
+    var style: *c.ImGuiStyle = c.igGetStyle();
+    style.WindowPadding = c.ImVec2{ .x = 10, .y = 10 };
+    style.FramePadding = c.ImVec2{ .x = 5, .y = 5 };
+    style.ItemInnerSpacing = c.ImVec2{ .x = 7, .y = 6 };
+    style.ItemSpacing = c.ImVec2{ .x = 7, .y = 7 };
+    style.ScrollbarSize = 17;
+    style.WindowBorderSize = 0;
+
     c.igStyleColorsDark(null);
 
     _ = c.ImGui_ImplSDL3_InitForSDLRenderer(window.getNativeWindow(), window.getNativeRenderer());

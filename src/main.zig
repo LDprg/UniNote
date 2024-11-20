@@ -1,5 +1,7 @@
 const std = @import("std");
 
+const c = @import("c.zig");
+
 const window = @import("window.zig");
 const imgui = @import("imgui.zig");
 const cairo = @import("cairo.zig");
@@ -24,8 +26,8 @@ pub fn main() !void {
     try cairo.init();
     defer cairo.deinit();
 
-    // try protobuf.init(alloc);
-    // defer protobuf.deinit();
+    try protobuf.init(alloc);
+    defer protobuf.deinit();
 
     loop: while (true) {
         while (window.getEvent()) |e| {
@@ -45,6 +47,8 @@ pub fn main() !void {
 
             if (imgui.beginMenu("File", true)) {
                 defer imgui.endMenu();
+
+                std.debug.print("Size: {}\n", .{@as(i32, @intFromFloat(c.igGetFrameHeight()))});
 
                 if (imgui.MenuItem("Save", "", false, true)) {
                     std.debug.print("Save\n", .{});
