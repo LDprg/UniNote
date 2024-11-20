@@ -23,7 +23,7 @@ pub fn build(b: *std.Build) void {
     const protoc_step = protobuf.RunProtocStep.create(b, protobuf_dep.builder, target, .{
         .destination_directory = b.path("src/proto"),
         .source_files = &.{
-            "protocol/all.proto",
+            "proto/test.proto",
         },
         .include_directories = &.{},
     });
@@ -68,6 +68,11 @@ pub fn build(b: *std.Build) void {
     }
 
     const run_step = b.step("run", "Run the app");
+
     run_step.dependOn(gen_proto);
     run_step.dependOn(&run_cmd.step);
+
+    const resources = b.addInstallDirectory(.{ .include_extensions = &.{".ttf"}, .source_dir = b.path("res"), .install_dir = .prefix, .install_subdir = "bin/res" });
+
+    b.getInstallStep().dependOn(&resources.step);
 }

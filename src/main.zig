@@ -24,8 +24,8 @@ pub fn main() !void {
     try cairo.init();
     defer cairo.deinit();
 
-    try protobuf.init(alloc);
-    defer protobuf.deinit();
+    // try protobuf.init(alloc);
+    // defer protobuf.deinit();
 
     loop: while (true) {
         while (window.getEvent()) |e| {
@@ -39,6 +39,21 @@ pub fn main() !void {
 
         cairo.update();
         imgui.update();
+
+        if (imgui.beginMainMenuBar()) {
+            defer imgui.endMainMenuBar();
+
+            if (imgui.beginMenu("File", true)) {
+                defer imgui.endMenu();
+
+                if (imgui.MenuItem("Save", "", false, true)) {
+                    std.debug.print("Save\n", .{});
+                }
+                if (imgui.MenuItem("Open", "", false, true)) {
+                    std.debug.print("Open\n", .{});
+                }
+            }
+        }
 
         imgui.showDemoWindow(null);
 

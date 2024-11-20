@@ -5,5 +5,5 @@ zig-out
 
 src/proto
 
-test.*
-imgui.ini
+/test.*
+/imgui.ini

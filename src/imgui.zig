@@ -18,6 +18,8 @@ pub fn init() !void {
     io.ConfigFlags |= c.ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
     io.ConfigFlags |= c.ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
 
+    _ = c.ImFontAtlas_AddFontFromFileTTF(io.Fonts, "res/FiraSans-Regular.ttf", 20, null, c.ImFontAtlas_GetGlyphRangesDefault(io.Fonts));
+
     c.igStyleColorsDark(null);
 
     _ = c.ImGui_ImplSDL3_InitForSDLRenderer(window.getNativeWindow(), window.getNativeRenderer());
@@ -49,4 +51,24 @@ pub fn draw() void {
 
 pub fn showDemoWindow(open: ?*bool) void {
     c.igShowDemoWindow(open);
+}
+
+pub fn beginMainMenuBar() bool {
+    return c.igBeginMainMenuBar();
+}
+
+pub fn endMainMenuBar() void {
+    c.igEndMainMenuBar();
+}
+
+pub fn beginMenu(label: []const u8, enabled: bool) bool {
+    return c.igBeginMenu(@ptrCast(label), enabled);
+}
+
+pub fn endMenu() void {
+    c.igEndMenu();
+}
+
+pub fn MenuItem(label: []const u8, shortcut: []const u8, selected: bool, enabled: bool) bool {
+    return c.igMenuItem_Bool(@ptrCast(label), @ptrCast(shortcut), selected, enabled);
 }
