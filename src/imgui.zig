@@ -46,3 +46,7 @@ pub fn draw() void {
 
     c.ImGui_ImplSDLRenderer3_RenderDrawData(c.igGetDrawData(), window.getNativeRenderer());
 }
+
+pub fn showDemoWindow(open: ?*bool) void {
+    c.igShowDemoWindow(open);
+}

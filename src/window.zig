@@ -6,6 +6,7 @@ var sdl_window: ?*c.SDL_Window = undefined;
 var sdl_renderer: ?*c.SDL_Renderer = undefined;
 
 pub const size = struct { x: i32, y: i32 };
+pub const event = enum(u32) { quit = c.SDL_EVENT_QUIT };
 
 pub fn init(x: i32, y: i32) void {
     const sdL_init = c.SDL_Init(c.SDL_INIT_VIDEO);
@@ -64,10 +65,10 @@ pub fn getSize() size {
     return .{ .x = x, .y = y };
 }
 
-pub fn draw(drawFn: fn () void) void {
+pub fn clear() void {
     _ = c.SDL_RenderClear(sdl_renderer);
+}
 
-    drawFn();
-
+pub fn draw() void {
     _ = c.SDL_RenderPresent(sdl_renderer);
 }
