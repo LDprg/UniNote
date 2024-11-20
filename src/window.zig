@@ -8,7 +8,7 @@ var sdl_renderer: ?*c.SDL_Renderer = undefined;
 pub const size = struct { x: i32, y: i32 };
 pub const event = enum(u32) { quit = c.SDL_EVENT_QUIT };
 
-pub fn init(x: i32, y: i32) void {
+pub fn init(x: i32, y: i32) !void {
     const sdL_init = c.SDL_Init(c.SDL_INIT_VIDEO);
 
     if (!sdL_init) {

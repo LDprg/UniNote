@@ -6,7 +6,7 @@ const window = @import("window.zig");
 
 var context: ?*c.ImGuiContext = undefined;
 
-pub fn init() void {
+pub fn init() !void {
     context = c.igCreateContext(null);
 
     if (context == null) {

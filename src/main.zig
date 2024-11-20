@@ -8,22 +8,22 @@ const event = @import("event.zig");
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    defer _ = gpa.deinit();
+    defer {
+        const check = gpa.deinit();
+        if (check == .leak) @panic("Leaks deteced!");
+    }
 
     const alloc = gpa.allocator();
 
-    window.init(1280, 960);
+    try window.init(1280, 960);
     defer window.deinit();
 
-    // imgui
-    imgui.init();
+    try imgui.init();
     defer imgui.deinit();
 
-    // cairo init
-    cairo.init();
+    try cairo.init();
     defer cairo.deinit();
 
-    // protobuf
     try protobuf.init(alloc);
     defer protobuf.deinit();
 
@@ -32,7 +32,7 @@ pub fn main() !void {
             imgui.processEvent(&e);
 
             switch (@as(event.event, @enumFromInt(e.type))) {
-                event.event.quit => break :loop,
+                .quit => break :loop,
                 else => {},
             }
         }

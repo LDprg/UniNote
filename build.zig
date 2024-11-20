@@ -21,7 +21,6 @@ pub fn build(b: *std.Build) void {
     const gen_proto = b.step("gen-proto", "generates zig files from protocol buffer definitions");
 
     const protoc_step = protobuf.RunProtocStep.create(b, protobuf_dep.builder, target, .{
-        // out directory for the generated zig files
         .destination_directory = b.path("src/proto"),
         .source_files = &.{
             "protocol/all.proto",
@@ -33,7 +32,7 @@ pub fn build(b: *std.Build) void {
 
     exe.root_module.addImport("protobuf", protobuf_dep.module("protobuf"));
 
-    // cimgui
+    // cimgui & imgui
     const cimgui_dep = b.dependency("cimgui", .{
         .target = target,
         .optimize = optimize,

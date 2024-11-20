@@ -10,7 +10,7 @@ var sdl_surface: *c.SDL_Surface = undefined;
 var surface: ?*c.cairo_surface_t = undefined;
 var cairo: ?*c.cairo_t = undefined;
 
-pub fn init() void {
+pub fn init() !void {
     const size = window.getSize();
     sdl_texture = c.SDL_CreateTexture(window.getNativeRenderer(), c.SDL_PIXELFORMAT_ABGR32, c.SDL_TEXTUREACCESS_STREAMING, size.x, size.y);
 
