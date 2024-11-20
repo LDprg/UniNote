@@ -29,13 +29,6 @@ pub fn init() !void {
         std.debug.print("Could not create cairo_render!\n", .{});
         return;
     }
-
-    c.cairo_set_source_rgb(cairo, 1.0, 1.0, 1.0);
-    c.cairo_paint(cairo);
-
-    c.cairo_set_source_rgb(cairo, 0.0, 0.0, 1.0);
-    c.cairo_rectangle(cairo, 100, 30, 200, 150);
-    c.cairo_fill(cairo);
 }
 
 pub fn deinit() void {
@@ -51,4 +44,8 @@ pub fn update() void {
 
 pub fn draw() void {
     _ = c.SDL_RenderTexture(window.getNativeRenderer(), sdl_texture, null, null);
+}
+
+pub fn getNative() ?*c.cairo_t {
+    return cairo;
 }

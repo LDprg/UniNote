@@ -34,7 +34,17 @@ pub fn main() !void {
             imgui.processEvent(&e);
 
             switch (@as(event.event, @enumFromInt(e.type))) {
-                .quit => break :loop,
+                event.event.quit => break :loop,
+                event.event.mouseMotion => {
+                    const cr = cairo.getNative();
+
+                    c.cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
+                    c.cairo_paint(cr);
+
+                    c.cairo_set_source_rgb(cr, 0.0, 0.0, 1.0);
+                    c.cairo_rectangle(cr, e.motion.x, e.motion.y, 200, 150);
+                    c.cairo_fill(cr);
+                },
                 else => {},
             }
         }
@@ -42,24 +52,24 @@ pub fn main() !void {
         cairo.update();
         imgui.update();
 
-        if (imgui.beginMainMenuBar()) {
-            defer imgui.endMainMenuBar();
+        if (c.igBeginMainMenuBar()) {
+            defer c.igEndMainMenuBar();
 
-            if (imgui.beginMenu("File", true)) {
-                defer imgui.endMenu();
+            if (c.igBeginMenu("File", true)) {
+                defer c.igEndMenu();
 
                 std.debug.print("Size: {}\n", .{@as(i32, @intFromFloat(c.igGetFrameHeight()))});
 
-                if (imgui.MenuItem("Save", "", false, true)) {
+                if (c.igMenuItem_Bool("Save", "", false, true)) {
                     std.debug.print("Save\n", .{});
                 }
-                if (imgui.MenuItem("Open", "", false, true)) {
+                if (c.igMenuItem_Bool("Open", "", false, true)) {
                     std.debug.print("Open\n", .{});
                 }
             }
         }
 
-        imgui.showDemoWindow(null);
+        c.igShowDemoWindow(null);
 
         window.clear();
 
