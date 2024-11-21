@@ -61,10 +61,8 @@ pub fn main() !void {
 
         c.igShowDemoWindow(null);
 
-        window.clear();
-
-        imgui.draw();
         skia.draw();
+        imgui.draw();
 
         window.draw();
     }

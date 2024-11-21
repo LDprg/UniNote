@@ -6,8 +6,6 @@ const c = @import("c.zig");
 
 const window = @import("window.zig");
 
-var gl_context: ?*c.SDL_GLContextState = undefined;
-
 var interface: ?*const skia.gr_glinterface_t = undefined;
 var context: ?*skia.gr_direct_context_t = undefined;
 var backendRenderTarget: ?*skia.gr_backendrendertarget_t = undefined;
@@ -16,18 +14,6 @@ var surface: ?*skia.sk_surface_t = undefined;
 var canvas: ?*skia.sk_canvas_t = undefined;
 
 pub fn init() !void {
-    gl_context = c.SDL_GL_CreateContext(window.getNativeWindow());
-
-    if (gl_context == null) {
-        std.debug.print("Could not create OpenGL context: {s}\n", .{c.SDL_GetError()});
-        return;
-    }
-
-    if (!c.SDL_GL_MakeCurrent(window.getNativeWindow(), gl_context)) {
-        std.debug.print("Set current OpenGL context: {s}\n", .{c.SDL_GetError()});
-        return;
-    }
-
     interface = skia.gr_glinterface_create_native_interface();
     context = skia.gr_direct_context_make_gl(interface) orelse return error.SkiaCreateContextFailed;
 
@@ -52,8 +38,6 @@ pub fn deinit() void {
     skia.sk_surface_unref(surface);
     skia.gr_direct_context_free_gpu_resources(context);
     skia.gr_glinterface_unref(interface);
-
-    _ = c.SDL_GL_DestroyContext(gl_context);
 }
 
 pub fn draw() void {

@@ -30,13 +30,13 @@ pub fn init() !void {
 
     c.igStyleColorsDark(null);
 
-    _ = c.ImGui_ImplSDL3_InitForSDLRenderer(window.getNativeWindow(), window.getNativeRenderer());
+    _ = c.ImGui_ImplSDL3_InitForOpenGL(window.getNativeWindow(), window.getNativeOpengl());
 
-    _ = c.ImGui_ImplSDLRenderer3_Init(window.getNativeRenderer());
+    _ = c.ImGui_ImplOpenGL3_Init("#version 130");
 }
 
 pub fn deinit() void {
-    c.ImGui_ImplSDLRenderer3_Shutdown();
+    c.ImGui_ImplOpenGL3_Shutdown();
     c.ImGui_ImplSDL3_Shutdown();
     c.igDestroyContext(context);
 }
@@ -46,7 +46,7 @@ pub fn processEvent(e: *const c.SDL_Event) void {
 }
 
 pub fn update() void {
-    _ = c.ImGui_ImplSDLRenderer3_NewFrame();
+    _ = c.ImGui_ImplOpenGL3_NewFrame();
     _ = c.ImGui_ImplSDL3_NewFrame();
     _ = c.igNewFrame();
 }
@@ -54,5 +54,5 @@ pub fn update() void {
 pub fn draw() void {
     c.igRender();
 
-    c.ImGui_ImplSDLRenderer3_RenderDrawData(c.igGetDrawData(), window.getNativeRenderer());
+    c.ImGui_ImplOpenGL3_RenderDrawData(c.igGetDrawData());
 }

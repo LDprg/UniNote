@@ -5,6 +5,8 @@ const c = @import("c.zig");
 var sdl_window: ?*c.SDL_Window = undefined;
 var sdl_renderer: ?*c.SDL_Renderer = undefined;
 
+var gl_context: ?*c.SDL_GLContextState = undefined;
+
 pub const size = struct { x: i32, y: i32 };
 pub const event = enum(u32) { quit = c.SDL_EVENT_QUIT };
 
@@ -37,6 +39,19 @@ pub fn init(x: i32, y: i32) !void {
         return;
     }
 
+    gl_context = c.SDL_GL_CreateContext(sdl_window);
+    _ = c.SDL_GL_SetSwapInterval(1);
+
+    if (gl_context == null) {
+        std.debug.print("Could not create OpenGL context: {s}\n", .{c.SDL_GetError()});
+        return;
+    }
+
+    if (!c.SDL_GL_MakeCurrent(sdl_window, gl_context)) {
+        std.debug.print("Set current OpenGL context: {s}\n", .{c.SDL_GetError()});
+        return;
+    }
+
     c.glViewport(0, 0, x, y);
     c.glClearColor(1, 1, 1, 1);
     c.glClearStencil(0);
@@ -48,12 +63,11 @@ pub fn init(x: i32, y: i32) !void {
         std.debug.print("Could not create renderer: {s}\n", .{c.SDL_GetError()});
         return;
     }
-
-    _ = c.SDL_SetRenderVSync(sdl_renderer, 1);
 }
 
 pub fn deinit() void {
-    c.SDL_DestroyRenderer(sdl_renderer);
+    _ = c.SDL_GL_DestroyContext(gl_context);
+
     c.SDL_DestroyWindow(sdl_window);
     c.SDL_Quit();
 }
@@ -62,8 +76,8 @@ pub fn getNativeWindow() ?*c.SDL_Window {
     return sdl_window;
 }
 
-pub fn getNativeRenderer() ?*c.SDL_Renderer {
-    return sdl_renderer;
+pub fn getNativeOpengl() ?*c.SDL_GLContextState {
+    return gl_context;
 }
 
 pub fn getEvent() ?c.SDL_Event {
@@ -88,12 +102,6 @@ pub fn getWindowTitle() [*]const u8 {
     return c.SDL_GetWindowTitle(sdl_window);
 }
 
-pub fn clear() void {
-    _ = c.SDL_RenderClear(sdl_renderer);
-}
-
 pub fn draw() void {
     _ = c.SDL_GL_SwapWindow(sdl_window);
-
-    // _ = c.SDL_RenderPresent(sdl_renderer);
 }
