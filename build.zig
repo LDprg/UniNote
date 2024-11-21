@@ -58,7 +58,7 @@ pub fn build(b: *std.Build) void {
 
     // SDL3
     exe.linkSystemLibrary("SDL3");
-    exe.linkSystemLibrary("vulkan");
+    exe.linkSystemLibrary("opengl");
 
     // libc
     exe.linkLibC();

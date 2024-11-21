@@ -23,7 +23,7 @@ pub fn main() !void {
     try imgui.init();
     defer imgui.deinit();
 
-    try skia.init(alloc);
+    try skia.init();
     defer skia.deinit();
 
     try protobuf.init(alloc);

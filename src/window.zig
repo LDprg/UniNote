@@ -16,12 +16,31 @@ pub fn init(x: i32, y: i32) !void {
         return;
     }
 
+    _ = c.SDL_GL_SetAttribute(c.SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    _ = c.SDL_GL_SetAttribute(c.SDL_GL_CONTEXT_MINOR_VERSION, 0);
+
+    _ = c.SDL_GL_SetAttribute(c.SDL_GL_CONTEXT_PROFILE_MASK, c.SDL_GL_CONTEXT_PROFILE_CORE);
+
+    _ = c.SDL_GL_SetAttribute(c.SDL_GL_RED_SIZE, 8);
+    _ = c.SDL_GL_SetAttribute(c.SDL_GL_GREEN_SIZE, 8);
+    _ = c.SDL_GL_SetAttribute(c.SDL_GL_BLUE_SIZE, 8);
+    _ = c.SDL_GL_SetAttribute(c.SDL_GL_DOUBLEBUFFER, 1);
+    _ = c.SDL_GL_SetAttribute(c.SDL_GL_DEPTH_SIZE, 0);
+
+    _ = c.SDL_GL_SetAttribute(c.SDL_GL_STENCIL_SIZE, 8);
+    _ = c.SDL_GL_SetAttribute(c.SDL_GL_ACCELERATED_VISUAL, 1);
+
     sdl_window = c.SDL_CreateWindow("UniNote", x, y, c.SDL_WINDOW_OPENGL);
 
     if (sdl_window == null) {
         std.debug.print("Could not create window: {s}\n", .{c.SDL_GetError()});
         return;
     }
+
+    c.glViewport(0, 0, x, y);
+    c.glClearColor(1, 1, 1, 1);
+    c.glClearStencil(0);
+    c.glClear(c.GL_COLOR_BUFFER_BIT | c.GL_STENCIL_BUFFER_BIT);
 
     sdl_renderer = c.SDL_CreateRenderer(sdl_window, null);
 
@@ -74,5 +93,7 @@ pub fn clear() void {
 }
 
 pub fn draw() void {
-    _ = c.SDL_RenderPresent(sdl_renderer);
+    _ = c.SDL_GL_SwapWindow(sdl_window);
+
+    // _ = c.SDL_RenderPresent(sdl_renderer);
 }
