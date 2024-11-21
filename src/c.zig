@@ -5,7 +5,6 @@ const c = @cImport({
     @cInclude("cimgui.h");
     @cInclude("cimgui_impl.h");
     @cInclude("cimgui_impl_sdlrenderer3.h");
-    @cInclude("cairo/cairo.h");
 });
 
 pub usingnamespace c;

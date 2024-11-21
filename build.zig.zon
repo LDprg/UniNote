@@ -10,6 +10,10 @@
         .cimgui = .{
             .path = "./deps/cimgui",
         },
+        .@"skia-zig" = .{
+            .url = "https://github.com/LDprg/skia-zig/releases/latest/download/skia-zig-package.zip",
+            .hash = "12200fa46b4df51e112ee06b88e610e319dcb575abe88beed29ce03bc57d22b87186",
+        },
     },
 
     .paths = .{

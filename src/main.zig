@@ -4,9 +4,9 @@ const c = @import("c.zig");
 
 const window = @import("window.zig");
 const imgui = @import("imgui.zig");
-const cairo = @import("cairo.zig");
 const protobuf = @import("protobuf.zig");
 const event = @import("event.zig");
+const skia = @import("skia.zig");
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
@@ -23,8 +23,8 @@ pub fn main() !void {
     try imgui.init();
     defer imgui.deinit();
 
-    try cairo.init();
-    defer cairo.deinit();
+    try skia.init(alloc);
+    defer skia.deinit();
 
     try protobuf.init(alloc);
     defer protobuf.deinit();
@@ -35,21 +35,11 @@ pub fn main() !void {
 
             switch (@as(event.event, @enumFromInt(e.type))) {
                 event.event.quit => break :loop,
-                event.event.mouseMotion => {
-                    const cr = cairo.getNative();
-
-                    c.cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
-                    c.cairo_paint(cr);
-
-                    c.cairo_set_source_rgb(cr, 0.0, 0.0, 1.0);
-                    c.cairo_rectangle(cr, e.motion.x, e.motion.y, 200, 150);
-                    c.cairo_fill(cr);
-                },
+                event.event.mouseMotion => {},
                 else => {},
             }
         }
 
-        cairo.update();
         imgui.update();
 
         if (c.igBeginMainMenuBar()) {
@@ -73,8 +63,8 @@ pub fn main() !void {
 
         window.clear();
 
-        cairo.draw();
         imgui.draw();
+        skia.draw();
 
         window.draw();
     }

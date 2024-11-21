@@ -16,7 +16,7 @@ pub fn init(x: i32, y: i32) !void {
         return;
     }
 
-    sdl_window = c.SDL_CreateWindow("UniNote", x, y, c.SDL_WINDOW_VULKAN);
+    sdl_window = c.SDL_CreateWindow("UniNote", x, y, c.SDL_WINDOW_OPENGL);
 
     if (sdl_window == null) {
         std.debug.print("Could not create window: {s}\n", .{c.SDL_GetError()});
@@ -63,6 +63,10 @@ pub fn getSize() size {
     _ = c.SDL_GetWindowSize(sdl_window, @ptrCast(&x), @ptrCast(&y));
 
     return .{ .x = x, .y = y };
+}
+
+pub fn getWindowTitle() [*]const u8 {
+    return c.SDL_GetWindowTitle(sdl_window);
 }
 
 pub fn clear() void {
