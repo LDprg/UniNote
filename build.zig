@@ -41,12 +41,12 @@ pub fn build(b: *std.Build) void {
     exe.addIncludePath(cimgui_dep.path("generator/output"));
     exe.addIncludePath(cimgui_dep.path("imgui"));
     exe.addIncludePath(cimgui_dep.path("imgui/backends"));
-    exe.addIncludePath(b.path("deps/override/"));
+    exe.addIncludePath(b.path("deps/interfaces/"));
 
     exe.addCSourceFiles(.{
         .root = cimgui_dep.path(""),
         .flags = &.{"-DIMGUI_IMPL_API=extern \"C\""},
-        .files = &.{ "cimgui.cpp", "imgui/imgui.cpp", "imgui/imgui_widgets.cpp", "imgui/imgui_draw.cpp", "imgui/imgui_tables.cpp", "imgui/imgui_demo.cpp", "imgui/backends/imgui_impl_sdl3.cpp", "imgui/backends/imgui_impl_opengl3.cpp" },
+        .files = &.{ "cimgui.cpp", "imgui/imgui.cpp", "imgui/imgui_widgets.cpp", "imgui/imgui_draw.cpp", "imgui/imgui_tables.cpp", "imgui/imgui_demo.cpp", "imgui/backends/imgui_impl_sdl3.cpp", "imgui/backends/imgui_impl_vulkan.cpp" },
     });
 
     // skia
@@ -58,8 +58,7 @@ pub fn build(b: *std.Build) void {
 
     // SDL3
     exe.linkSystemLibrary("SDL3");
-    exe.linkSystemLibrary("opengl");
-    exe.linkSystemLibrary("egl");
+    exe.linkSystemLibrary("vulkan");
 
     // libc
     exe.linkLibC();

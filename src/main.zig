@@ -17,17 +17,19 @@ pub fn main() !void {
 
     const alloc = gpa.allocator();
 
-    try window.init(1280, 960);
+    try window.init(alloc, 1280, 960);
     defer window.deinit();
 
     try imgui.init();
-    defer imgui.deinit();
+    defer imgui.deinit() catch std.debug.panic("Imgui deinit failed", .{});
 
-    try skia.init();
-    defer skia.deinit();
+    // try skia.init();
+    // defer skia.deinit();
 
     try protobuf.init(alloc);
     defer protobuf.deinit();
+
+    std.debug.print("Staring Main Loop\n", .{});
 
     var x: f32 = 0;
     var y: f32 = 0;
@@ -67,19 +69,19 @@ pub fn main() !void {
 
         c.igShowDemoWindow(null);
 
-        const fill = skia.sk_paint_new();
-        defer skia.sk_paint_delete(fill);
-        skia.sk_paint_set_color(fill, 0xff0000ff);
-        const rect = skia.sk_rect_t{
-            .left = x,
-            .bottom = y,
-            .right = x + 100,
-            .top = y + 100,
-        };
-        skia.sk_canvas_draw_rect(skia.getNative(), &rect, fill);
+        // const fill = skia.sk_paint_new();
+        // defer skia.sk_paint_delete(fill);
+        // skia.sk_paint_set_color(fill, 0xff0000ff);
+        // const rect = skia.sk_rect_t{
+        //     .left = x,
+        //     .bottom = y,
+        //     .right = x + 100,
+        //     .top = y + 100,
+        // };
+        // skia.sk_canvas_draw_rect(skia.getNative(), &rect, fill);
 
-        skia.draw();
-        imgui.draw();
+        // skia.draw();
+        try imgui.draw();
 
         window.draw();
     }

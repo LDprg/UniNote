@@ -1,16 +1,18 @@
 const std = @import("std");
 
+const vulkan = @import("vulkan.zig");
+
 const c = @import("c.zig");
 
 var sdl_window: ?*c.SDL_Window = undefined;
-
-var gl_context: ?*c.SDL_GLContextState = undefined;
+pub var surface: c.VkSurfaceKHR = undefined;
+pub var extensions: []const ?[*]const u8 = undefined;
 
 pub const size = struct { x: i32, y: i32 };
 pub const event = enum(u32) { quit = c.SDL_EVENT_QUIT };
 
-pub fn init(x: i32, y: i32) !void {
-    _ = c.SDL_SetHint(c.SDL_HINT_VIDEO_DRIVER, "wayland,x11");
+pub fn init(alloc: std.mem.Allocator, x: i32, y: i32) !void {
+    // _ = c.SDL_SetHint(c.SDL_HINT_VIDEO_DRIVER, "wayland,x11");
 
     std.debug.print("Init SDL\n", .{});
 
@@ -21,45 +23,31 @@ pub fn init(x: i32, y: i32) !void {
         return;
     }
 
-    _ = c.SDL_GL_SetAttribute(c.SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-    _ = c.SDL_GL_SetAttribute(c.SDL_GL_CONTEXT_MINOR_VERSION, 0);
-
-    _ = c.SDL_GL_SetAttribute(c.SDL_GL_CONTEXT_PROFILE_MASK, c.SDL_GL_CONTEXT_PROFILE_CORE);
-
-    _ = c.SDL_GL_SetAttribute(c.SDL_GL_RED_SIZE, 8);
-    _ = c.SDL_GL_SetAttribute(c.SDL_GL_GREEN_SIZE, 8);
-    _ = c.SDL_GL_SetAttribute(c.SDL_GL_BLUE_SIZE, 8);
-    _ = c.SDL_GL_SetAttribute(c.SDL_GL_DOUBLEBUFFER, 1);
-    _ = c.SDL_GL_SetAttribute(c.SDL_GL_DEPTH_SIZE, 0);
-
-    _ = c.SDL_GL_SetAttribute(c.SDL_GL_STENCIL_SIZE, 8);
-    _ = c.SDL_GL_SetAttribute(c.SDL_GL_ACCELERATED_VISUAL, 1);
-
     std.debug.print("Init Window\n", .{});
 
-    sdl_window = c.SDL_CreateWindow("UniNote", x, y, c.SDL_WINDOW_OPENGL);
+    sdl_window = c.SDL_CreateWindow("UniNote", x, y, c.SDL_WINDOW_VULKAN | c.SDL_WINDOW_RESIZABLE | c.SDL_WINDOW_HIGH_PIXEL_DENSITY);
 
     if (sdl_window == null) {
         std.debug.print("Could not create window: {s}\n", .{c.SDL_GetError()});
         return;
     }
 
-    gl_context = c.SDL_GL_CreateContext(sdl_window);
-    _ = c.SDL_GL_SetSwapInterval(1);
+    var extensions_count: u32 = 0;
+    _ = c.SDL_Vulkan_GetInstanceExtensions(&extensions_count);
+    extensions = c.SDL_Vulkan_GetInstanceExtensions(&extensions_count)[0..extensions_count];
 
-    if (gl_context == null) {
-        std.debug.print("Could not create OpenGL context: {s}\n", .{c.SDL_GetError()});
-        return;
-    }
+    try vulkan.init(alloc);
 
-    if (!c.SDL_GL_MakeCurrent(sdl_window, gl_context)) {
-        std.debug.print("Set current OpenGL context: {s}\n", .{c.SDL_GetError()});
-        return;
+    // Create Window Surface
+    const surface_init = c.SDL_Vulkan_CreateSurface(sdl_window, vulkan.g_Instance, vulkan.g_Allocator, &surface);
+    if (!surface_init) {
+        std.debug.panic("Failed to create Vulkan surface.\n", .{});
     }
 }
 
 pub fn deinit() void {
-    _ = c.SDL_GL_DestroyContext(gl_context);
+    vulkan.deinit();
+    // c.SDL_Vulkan_DestroySurface(vulkan.g_Instance, surface, vulkan.g_Allocator);
 
     c.SDL_DestroyWindow(sdl_window);
     c.SDL_Quit();
@@ -69,10 +57,6 @@ pub fn getNativeWindow() ?*c.SDL_Window {
     return sdl_window;
 }
 
-pub fn getNativeOpengl() ?*c.SDL_GLContextState {
-    return gl_context;
-}
-
 pub fn getEvent() ?c.SDL_Event {
     var e: c.SDL_Event = undefined;
 
@@ -80,6 +64,10 @@ pub fn getEvent() ?c.SDL_Event {
         return e;
 
     return null;
+}
+
+pub fn showWindow() void {
+    _ = c.SDL_ShowWindow(sdl_window);
 }
 
 pub fn getSize() size {
@@ -95,6 +83,4 @@ pub fn getWindowTitle() [*]const u8 {
     return c.SDL_GetWindowTitle(sdl_window);
 }
 
-pub fn draw() void {
-    _ = c.SDL_GL_SwapWindow(sdl_window);
-}
+pub fn draw() void {}

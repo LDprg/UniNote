@@ -12,7 +12,7 @@
         },
         .@"skia-zig" = .{
             .url = "https://github.com/LDprg/skia-zig/releases/latest/download/skia-zig-package.zip",
-            .hash = "12208cf4c2eb8a56fbea338a579be45887ff77ceb1533784e3982cf5ee552ad938f8",
+            .hash = "1220f61cbc1502b76f047da793bcf4f198254bb46371e8178188fd4282f6a12eb8f4",
         },
     },
 
