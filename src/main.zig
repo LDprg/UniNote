@@ -29,13 +29,19 @@ pub fn main() !void {
     try protobuf.init(alloc);
     defer protobuf.deinit();
 
+    var x: f32 = 0;
+    var y: f32 = 0;
+
     loop: while (true) {
         while (window.getEvent()) |e| {
             imgui.processEvent(&e);
 
             switch (@as(event.event, @enumFromInt(e.type))) {
                 event.event.quit => break :loop,
-                event.event.mouseMotion => {},
+                event.event.mouseMotion, event.event.penMotion => {
+                    x = e.motion.x;
+                    y = e.motion.y;
+                },
                 else => {},
             }
         }
@@ -60,6 +66,17 @@ pub fn main() !void {
         }
 
         c.igShowDemoWindow(null);
+
+        const fill = skia.sk_paint_new();
+        defer skia.sk_paint_delete(fill);
+        skia.sk_paint_set_color(fill, 0xff0000ff);
+        const rect = skia.sk_rect_t{
+            .left = x,
+            .bottom = y,
+            .right = x + 100,
+            .top = y + 100,
+        };
+        skia.sk_canvas_draw_rect(skia.getNative(), &rect, fill);
 
         skia.draw();
         imgui.draw();
