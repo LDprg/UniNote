@@ -19,12 +19,13 @@ pub const commandBuffer = @import("vulkan/commandBuffer.zig");
 pub const syncObjects = @import("vulkan/syncObjects.zig");
 
 var arena_state: std.heap.ArenaAllocator = undefined;
+var arena: std.mem.Allocator = undefined;
 
 pub fn init(alloc: std.mem.Allocator) !void {
     std.debug.print("Init Vulkan\n", .{});
 
     arena_state = std.heap.ArenaAllocator.init(alloc);
-    const arena = arena_state.allocator();
+    arena = arena_state.allocator();
 
     try instance.init();
     try surface.init();
@@ -56,13 +57,35 @@ pub fn deinit() void {
     arena_state.deinit();
 }
 
+pub fn recreateSwapChain() !void {
+    try util.check_vk(c.vkDeviceWaitIdle(device.device));
+
+    frameBuffer.deinit();
+    imageView.deinit();
+    swapChain.deinit();
+
+    try swapChain.init(arena);
+    try imageView.init(arena);
+    try frameBuffer.init(arena);
+}
+
 pub fn draw() !void {
     // Render
     try util.check_vk(c.vkWaitForFences(device.device, 1, &syncObjects.inFlightFence, c.VK_TRUE, c.UINT64_MAX));
-    try util.check_vk(c.vkResetFences(device.device, 1, &syncObjects.inFlightFence));
 
     var imageIndex: u32 = undefined;
-    try util.check_vk(c.vkAcquireNextImageKHR(device.device, swapChain.swapChain, c.UINT64_MAX, syncObjects.imageAvailableSemaphore, null, &imageIndex));
+    {
+        const res = c.vkAcquireNextImageKHR(device.device, swapChain.swapChain, c.UINT64_MAX, syncObjects.imageAvailableSemaphore, null, &imageIndex);
+
+        if (res == c.VK_ERROR_OUT_OF_DATE_KHR) {
+            try recreateSwapChain();
+            return;
+        } else if (res != c.VK_SUBOPTIMAL_KHR) {
+            try util.check_vk(res);
+        }
+    }
+
+    try util.check_vk(c.vkResetFences(device.device, 1, &syncObjects.inFlightFence));
     try util.check_vk(c.vkResetCommandBuffer(commandBuffer.commandBuffer, 0));
 
     try commandBuffer.recordCommandBuffer(commandBuffer.commandBuffer, imageIndex);
@@ -97,5 +120,12 @@ pub fn draw() !void {
         .pResults = null,
     };
 
-    try util.check_vk(c.vkQueuePresentKHR(queue.presentQueue, &presentInfo));
+    {
+        const res = c.vkQueuePresentKHR(queue.presentQueue, &presentInfo);
+        if (res == c.VK_ERROR_OUT_OF_DATE_KHR or res == c.VK_SUBOPTIMAL_KHR) {
+            try recreateSwapChain();
+        } else {
+            try util.check_vk(res);
+        }
+    }
 }
