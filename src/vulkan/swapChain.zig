@@ -20,6 +20,7 @@ pub var presentModes: []c.VkPresentModeKHR = undefined;
 pub var format: c.VkSurfaceFormatKHR = undefined;
 pub var presentMode: c.VkPresentModeKHR = undefined;
 pub var extent: c.VkExtent2D = undefined;
+pub var imageSharingMode: u32 = undefined;
 
 pub var alloc: std.mem.Allocator = undefined;
 
@@ -100,14 +101,15 @@ pub fn init(alloc_root: std.mem.Allocator) !void {
     };
 
     if (queueFamily.graphicsFamily != queueFamily.presentFamily) {
-        createInfo.imageSharingMode = c.VK_SHARING_MODE_CONCURRENT;
+        imageSharingMode = c.VK_SHARING_MODE_CONCURRENT;
         createInfo.queueFamilyIndexCount = @intCast(queueFamilyIndices.len);
         createInfo.pQueueFamilyIndices = queueFamilyIndices.ptr;
     } else {
-        createInfo.imageSharingMode = c.VK_SHARING_MODE_EXCLUSIVE;
+        imageSharingMode = c.VK_SHARING_MODE_EXCLUSIVE;
         createInfo.queueFamilyIndexCount = 0;
         createInfo.pQueueFamilyIndices = null;
     }
+    createInfo.imageSharingMode = imageSharingMode;
 
     try util.check_vk(c.vkCreateSwapchainKHR(device.device, &createInfo, null, &swapChain));
 

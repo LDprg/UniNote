@@ -2,8 +2,6 @@ const std = @import("std");
 
 const c = @import("c.zig");
 
-const window = @import("window.zig");
-
 pub const util = @import("vulkan/util.zig");
 pub const instance = @import("vulkan/instance.zig");
 pub const surface = @import("vulkan/surface.zig");
@@ -17,6 +15,8 @@ pub const renderPass = @import("vulkan/renderPass.zig");
 pub const frameBuffer = @import("vulkan/frameBuffer.zig");
 pub const commandBuffer = @import("vulkan/commandBuffer.zig");
 pub const syncObjects = @import("vulkan/syncObjects.zig");
+
+pub var imageIndex: u32 = undefined;
 
 var arena_state: std.heap.ArenaAllocator = undefined;
 var arena: std.mem.Allocator = undefined;
@@ -69,11 +69,9 @@ pub fn recreateSwapChain() !void {
     try frameBuffer.init(arena);
 }
 
-pub fn draw() !void {
-    // Render
+pub fn clear() !void {
     try util.check_vk(c.vkWaitForFences(device.device, 1, &syncObjects.inFlightFence, c.VK_TRUE, c.UINT64_MAX));
 
-    var imageIndex: u32 = undefined;
     {
         const res = c.vkAcquireNextImageKHR(device.device, swapChain.swapChain, c.UINT64_MAX, syncObjects.imageAvailableSemaphore, null, &imageIndex);
 
@@ -89,9 +87,9 @@ pub fn draw() !void {
     try util.check_vk(c.vkResetCommandBuffer(commandBuffer.commandBuffer, 0));
 
     try commandBuffer.beginCommandBuffer(commandBuffer.commandBuffer, imageIndex);
+}
 
-    c.ImGui_ImplVulkan_RenderDrawData(c.igGetDrawData(), commandBuffer.commandBuffer, null);
-
+pub fn draw() !void {
     try commandBuffer.endCommandBuffer(commandBuffer.commandBuffer);
 
     const waitSemaphores: []const c.VkSemaphore = &.{syncObjects.imageAvailableSemaphore};

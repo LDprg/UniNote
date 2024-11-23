@@ -23,8 +23,8 @@ pub fn main() !void {
     try imgui.init();
     defer imgui.deinit() catch std.debug.panic("Imgui deinit failed", .{});
 
-    // try skia.init();
-    // defer skia.deinit();
+    try skia.init();
+    defer skia.deinit();
 
     try protobuf.init(alloc);
     defer protobuf.deinit();
@@ -79,6 +79,8 @@ pub fn main() !void {
         //     .top = y + 100,
         // };
         // skia.sk_canvas_draw_rect(skia.getNative(), &rect, fill);
+
+        try window.clear();
 
         // skia.draw();
         try imgui.draw();

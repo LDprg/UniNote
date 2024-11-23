@@ -34,6 +34,7 @@ pub fn init(alloc: std.mem.Allocator, x: i32, y: i32) !void {
 }
 
 pub fn deinit() void {
+    std.debug.print("Deinit sdl\n", .{});
     vulkan.deinit();
 
     c.SDL_DestroyWindow(sdl_window);
@@ -68,6 +69,10 @@ pub fn getSize() size {
 
 pub fn getWindowTitle() [*]const u8 {
     return c.SDL_GetWindowTitle(sdl_window);
+}
+
+pub fn clear() !void {
+    try vulkan.clear();
 }
 
 pub fn draw() !void {

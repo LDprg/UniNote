@@ -11,13 +11,19 @@ var queuePriority: f32 = 1.0;
 
 pub var device: c.VkDevice = undefined;
 
-pub const extensions: []const [*]const u8 = &.{
-    c.VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-};
+pub var extensions: []?[*]const u8 = undefined;
 
-pub fn init(alloc: std.mem.Allocator) !void {
+pub var alloc: std.mem.Allocator = undefined;
+
+pub fn init(alloc_root: std.mem.Allocator) !void {
+    alloc = alloc_root;
+
     var queueCreateInfos = std.ArrayList(c.VkDeviceQueueCreateInfo).init(alloc);
     defer queueCreateInfos.deinit();
+
+    extensions = try alloc.alloc(?[*]const u8, 2);
+    extensions[0] = c.VK_KHR_SWAPCHAIN_EXTENSION_NAME;
+    extensions[1] = c.VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME;
 
     const uniqueQueueFamilies = [_]u32{
         queueFamily.graphicsFamily.?,
@@ -41,9 +47,9 @@ pub fn init(alloc: std.mem.Allocator) !void {
         .queueCreateInfoCount = @intCast(queueCreateInfos.items.len),
         .pQueueCreateInfos = queueCreateInfos.items.ptr,
         .pEnabledFeatures = &deviceFeatures,
-        .enabledLayerCount = instance.layers.len,
+        .enabledLayerCount = @intCast(instance.layers.len),
         .ppEnabledLayerNames = instance.layers.ptr,
-        .enabledExtensionCount = extensions.len,
+        .enabledExtensionCount = @intCast(extensions.len),
         .ppEnabledExtensionNames = extensions.ptr,
     };
 

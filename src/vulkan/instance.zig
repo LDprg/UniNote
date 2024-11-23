@@ -20,7 +20,7 @@ pub fn init() !void {
         .applicationVersion = c.VK_MAKE_VERSION(1, 0, 0),
         .pEngineName = "No Engine",
         .engineVersion = c.VK_MAKE_VERSION(1, 0, 0),
-        .apiVersion = c.VK_API_VERSION_1_0,
+        .apiVersion = c.VK_API_VERSION_1_1,
     };
 
     var extensions_count: u32 = 0;

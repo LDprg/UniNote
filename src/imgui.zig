@@ -80,7 +80,7 @@ pub fn init() !void {
         .DescriptorPool = descriptorPool,
         .RenderPass = vulkan.renderPass.renderPass,
         .Subpass = 0,
-        .MinImageCount = 2,
+        .MinImageCount = vulkan.swapChain.capabilities.minImageCount,
         .ImageCount = @intCast(vulkan.swapChain.swapChainImages.len),
         .MSAASamples = c.VK_SAMPLE_COUNT_1_BIT,
         .Allocator = null,
@@ -90,6 +90,7 @@ pub fn init() !void {
 }
 
 pub fn deinit() !void {
+    std.debug.print("Deinit imgui\n", .{});
     _ = c.vkDeviceWaitIdle(vulkan.device.device);
 
     c.ImGui_ImplVulkan_Shutdown();
@@ -158,4 +159,6 @@ pub fn update() void {
 
 pub fn draw() !void {
     c.igRender();
+
+    c.ImGui_ImplVulkan_RenderDrawData(c.igGetDrawData(), vulkan.commandBuffer.commandBuffer, null);
 }
