@@ -11,50 +11,49 @@ const queueFamily = @import("queueFamily.zig");
 const device = @import("device.zig");
 
 pub var swapChain: c.VkSwapchainKHR = undefined;
+pub var swapChainImages: []c.VkImage = undefined;
 
 pub var capabilities: c.VkSurfaceCapabilitiesKHR = undefined;
-pub var formats: std.ArrayList(c.VkSurfaceFormatKHR) = undefined;
-pub var presentModes: std.ArrayList(c.VkPresentModeKHR) = undefined;
+pub var formats: []c.VkSurfaceFormatKHR = undefined;
+pub var presentModes: []c.VkPresentModeKHR = undefined;
 
 pub var format: c.VkSurfaceFormatKHR = undefined;
 pub var presentMode: c.VkPresentModeKHR = undefined;
 pub var extent: c.VkExtent2D = undefined;
 
-pub fn init(alloc: std.mem.Allocator) !void {
+pub var alloc: std.mem.Allocator = undefined;
+
+pub fn init(alloc_root: std.mem.Allocator) !void {
+    alloc = alloc_root;
+
     // init capabilities
     try util.check_vk(c.vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice.physicalDevice, surface.surface, &capabilities));
 
     // init formats
     var formatCount: u32 = 0;
-    formats = std.ArrayList(c.VkSurfaceFormatKHR).init(alloc);
     try util.check_vk(c.vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice.physicalDevice, surface.surface, &formatCount, null));
 
-    try std.testing.expect(formatCount > 0);
+    formats = try alloc.alloc(c.VkSurfaceFormatKHR, formatCount);
+    try util.check_vk(c.vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice.physicalDevice, surface.surface, &formatCount, formats.ptr));
+    try std.testing.expect(formats.len > 0);
 
-    try formats.resize(formatCount);
-    try util.check_vk(c.vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice.physicalDevice, surface.surface, &formatCount, formats.items.ptr));
-
-    // init presentMode
-    var presentModeCount: u32 = 0;
-    presentModes = std.ArrayList(c.VkPresentModeKHR).init(alloc);
-    try util.check_vk(c.vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice.physicalDevice, surface.surface, &presentModeCount, null));
-
-    try std.testing.expect(presentModeCount > 0);
-
-    try presentModes.resize(presentModeCount);
-    try util.check_vk(c.vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice.physicalDevice, surface.surface, &presentModeCount, presentModes.items.ptr));
-
-    // choose format
-    for (formats.items) |value| {
+    for (formats) |value| {
         if (value.format == c.VK_FORMAT_B8G8R8A8_SRGB and value.colorSpace == c.VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
             format = value;
             break;
         }
     }
 
-    // choose presentMode
+    // init presentMode
+    var presentModeCount: u32 = 0;
+    try util.check_vk(c.vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice.physicalDevice, surface.surface, &presentModeCount, null));
+
+    presentModes = try alloc.alloc(c.VkPresentModeKHR, presentModeCount);
+    try util.check_vk(c.vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice.physicalDevice, surface.surface, &presentModeCount, presentModes.ptr));
+    try std.testing.expect(presentModes.len > 0);
+
     presentMode = c.VK_PRESENT_MODE_FIFO_KHR;
-    for (presentModes.items) |value| {
+    for (presentModes) |value| {
         if (value == c.VK_PRESENT_MODE_MAILBOX_KHR) {
             presentMode = value;
             break;
@@ -111,11 +110,17 @@ pub fn init(alloc: std.mem.Allocator) !void {
     }
 
     try util.check_vk(c.vkCreateSwapchainKHR(device.device, &createInfo, null, &swapChain));
+
+    try util.check_vk(c.vkGetSwapchainImagesKHR(device.device, swapChain, &imageCount, null));
+
+    swapChainImages = try alloc.alloc(c.VkImage, imageCount);
+    try util.check_vk(c.vkGetSwapchainImagesKHR(device.device, swapChain, &imageCount, swapChainImages.ptr));
 }
 
 pub fn deinit() void {
     c.vkDestroySwapchainKHR(device.device, swapChain, null);
 
-    presentModes.deinit();
-    formats.deinit();
+    alloc.free(swapChainImages);
+    alloc.free(presentModes);
+    alloc.free(formats);
 }
