@@ -23,7 +23,8 @@ pub fn init(alloc: std.mem.Allocator, x: i32, y: i32) !void {
 
     std.debug.print("Init Window\n", .{});
 
-    sdl_window = c.SDL_CreateWindow("UniNote", x, y, c.SDL_WINDOW_VULKAN | c.SDL_WINDOW_RESIZABLE | c.SDL_WINDOW_HIGH_PIXEL_DENSITY);
+    // sdl_window = c.SDL_CreateWindow("UniNote", x, y, c.SDL_WINDOW_VULKAN | c.SDL_WINDOW_RESIZABLE | c.SDL_WINDOW_HIGH_PIXEL_DENSITY);
+    sdl_window = c.SDL_CreateWindow("UniNote", x, y, c.SDL_WINDOW_VULKAN | c.SDL_WINDOW_HIGH_PIXEL_DENSITY);
 
     if (sdl_window == null) {
         std.debug.print("Could not create window: {s}\n", .{c.SDL_GetError()});
@@ -70,4 +71,6 @@ pub fn getWindowTitle() [*]const u8 {
     return c.SDL_GetWindowTitle(sdl_window);
 }
 
-pub fn draw() void {}
+pub fn draw() !void {
+    try vulkan.draw();
+}

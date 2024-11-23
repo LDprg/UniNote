@@ -83,6 +83,6 @@ pub fn main() !void {
         // skia.draw();
         // try imgui.draw();
 
-        window.draw();
+        try window.draw();
     }
 }
