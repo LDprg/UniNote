@@ -42,4 +42,6 @@ pub fn deinit() void {
     for (swapChainImageViews) |imageView| {
         c.vkDestroyImageView(device.device, imageView, null);
     }
+
+    alloc.free(swapChainImageViews);
 }
