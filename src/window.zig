@@ -10,7 +10,7 @@ pub const size = struct { x: u32, y: u32 };
 pub const event = enum(u32) { quit = c.SDL_EVENT_QUIT };
 
 pub fn init(alloc: std.mem.Allocator, x: i32, y: i32) !void {
-    // _ = c.SDL_SetHint(c.SDL_HINT_VIDEO_DRIVER, "wayland,x11");
+    _ = c.SDL_SetHint(c.SDL_HINT_VIDEO_DRIVER, "wayland,x11");
 
     std.debug.print("Init SDL\n", .{});
 

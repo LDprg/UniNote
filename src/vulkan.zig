@@ -88,7 +88,11 @@ pub fn draw() !void {
     try util.check_vk(c.vkResetFences(device.device, 1, &syncObjects.inFlightFence));
     try util.check_vk(c.vkResetCommandBuffer(commandBuffer.commandBuffer, 0));
 
-    try commandBuffer.recordCommandBuffer(commandBuffer.commandBuffer, imageIndex);
+    try commandBuffer.beginCommandBuffer(commandBuffer.commandBuffer, imageIndex);
+
+    c.ImGui_ImplVulkan_RenderDrawData(c.igGetDrawData(), commandBuffer.commandBuffer, null);
+
+    try commandBuffer.endCommandBuffer(commandBuffer.commandBuffer);
 
     const waitSemaphores: []const c.VkSemaphore = &.{syncObjects.imageAvailableSemaphore};
     const waitStages: []const c.VkPipelineStageFlags = &.{c.VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};

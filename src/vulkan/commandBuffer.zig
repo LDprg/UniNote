@@ -35,7 +35,7 @@ pub fn deinit() void {
     c.vkDestroyCommandPool(device.device, commandPool, null);
 }
 
-pub fn recordCommandBuffer(cb: c.VkCommandBuffer, imageIndex: u32) !void {
+pub fn beginCommandBuffer(cb: c.VkCommandBuffer, imageIndex: u32) !void {
     const beginInfo = c.VkCommandBufferBeginInfo{
         .sType = c.VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
         .flags = 0,
@@ -59,7 +59,9 @@ pub fn recordCommandBuffer(cb: c.VkCommandBuffer, imageIndex: u32) !void {
     };
 
     c.vkCmdBeginRenderPass(cb, &renderPassInfo, c.VK_SUBPASS_CONTENTS_INLINE);
+}
 
+pub fn endCommandBuffer(cb: c.VkCommandBuffer) !void {
     c.vkCmdEndRenderPass(cb);
     try util.check_vk(c.vkEndCommandBuffer(cb));
 }

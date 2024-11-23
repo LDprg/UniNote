@@ -8,8 +8,8 @@ const window = @import("window.zig");
 
 var context: ?*c.ImGuiContext = undefined;
 
-var g_MainWindowData: c.ImGui_ImplVulkanH_Window = undefined;
-const g_MinImageCount = 2;
+var pipelineCache: c.VkPipelineCache = undefined;
+var descriptorPool: c.VkDescriptorPool = undefined;
 
 pub fn init() !void {
     std.debug.print("Init Imgui\n", .{});
@@ -45,32 +45,59 @@ pub fn init() !void {
 
     _ = c.ImGui_ImplSDL3_InitForVulkan(window.getNativeWindow());
 
-    var init_info = std.mem.zeroInit(c.ImGui_ImplVulkan_InitInfo, .{
-        .Instance = vulkan.g_Instance,
-        .PhysicalDevice = vulkan.g_PhysicalDevice,
-        .Device = vulkan.g_Device,
-        .QueueFamily = vulkan.g_QueueFamily.?,
-        .Queue = vulkan.g_Queue,
-        .PipelineCache = vulkan.g_PipelineCache,
-        .DescriptorPool = vulkan.g_DescriptorPool,
-        .RenderPass = g_MainWindowData.RenderPass,
+    const pool_sizes: []const c.VkDescriptorPoolSize = &.{
+        .{ .type = c.VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, .descriptorCount = 1 },
+        .{ .type = c.VK_DESCRIPTOR_TYPE_SAMPLER, .descriptorCount = 1000 },
+        .{ .type = c.VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, .descriptorCount = 1000 },
+        .{ .type = c.VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, .descriptorCount = 1000 },
+        .{ .type = c.VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, .descriptorCount = 1000 },
+        .{ .type = c.VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, .descriptorCount = 1000 },
+        .{ .type = c.VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, .descriptorCount = 1000 },
+        .{ .type = c.VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1000 },
+        .{ .type = c.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, .descriptorCount = 1000 },
+        .{ .type = c.VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, .descriptorCount = 1000 },
+        .{ .type = c.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, .descriptorCount = 1000 },
+        .{ .type = c.VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 1000 },
+    };
+
+    const pool_info = c.VkDescriptorPoolCreateInfo{
+        .sType = c.VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .flags = c.VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT,
+        .maxSets = 1000 * pool_sizes.len,
+        .poolSizeCount = pool_sizes.len,
+        .pPoolSizes = pool_sizes.ptr,
+    };
+
+    try vulkan.util.check_vk(c.vkCreateDescriptorPool(vulkan.device.device, &pool_info, null, &descriptorPool));
+
+    var init_info = c.ImGui_ImplVulkan_InitInfo{
+        .Instance = vulkan.instance.instance,
+        .PhysicalDevice = vulkan.physicalDevice.physicalDevice,
+        .Device = vulkan.device.device,
+        .QueueFamily = vulkan.queueFamily.graphicsFamily.?,
+        .Queue = vulkan.queue.graphicsQueue,
+        .PipelineCache = pipelineCache,
+        .DescriptorPool = descriptorPool,
+        .RenderPass = vulkan.renderPass.renderPass,
         .Subpass = 0,
-        .MinImageCount = g_MinImageCount,
-        .ImageCount = g_MainWindowData.ImageCount,
+        .MinImageCount = 2,
+        .ImageCount = @intCast(vulkan.swapChain.swapChainImages.len),
         .MSAASamples = c.VK_SAMPLE_COUNT_1_BIT,
-        .Allocator = vulkan.g_Allocator,
-        .CheckVkResultFn = vulkan.check_vk_c,
-    });
+        .Allocator = null,
+        .CheckVkResultFn = vulkan.util.check_vk_c,
+    };
     _ = c.ImGui_ImplVulkan_Init(&init_info);
 }
 
 pub fn deinit() !void {
+    _ = c.vkDeviceWaitIdle(vulkan.device.device);
+
     c.ImGui_ImplVulkan_Shutdown();
     c.ImGui_ImplSDL3_Shutdown();
 
     c.igDestroyContext(context);
 
-    c.ImGui_ImplVulkanH_DestroyWindow(vulkan.g_Instance, vulkan.g_Device, &g_MainWindowData, vulkan.g_Allocator);
+    c.vkDestroyDescriptorPool(vulkan.device.device, descriptorPool, null);
 }
 
 pub fn processEvent(e: *const c.SDL_Event) void {

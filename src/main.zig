@@ -20,8 +20,8 @@ pub fn main() !void {
     try window.init(alloc, 1280, 960);
     defer window.deinit();
 
-    // try imgui.init();
-    // defer imgui.deinit() catch std.debug.panic("Imgui deinit failed", .{});
+    try imgui.init();
+    defer imgui.deinit() catch std.debug.panic("Imgui deinit failed", .{});
 
     // try skia.init();
     // defer skia.deinit();
@@ -36,7 +36,7 @@ pub fn main() !void {
 
     loop: while (true) {
         while (window.getEvent()) |e| {
-            // imgui.processEvent(&e);
+            imgui.processEvent(&e);
 
             switch (@as(event.event, @enumFromInt(e.type))) {
                 event.event.quit => break :loop,
@@ -48,26 +48,26 @@ pub fn main() !void {
             }
         }
 
-        // imgui.update();
+        imgui.update();
 
-        // if (c.igBeginMainMenuBar()) {
-        //     defer c.igEndMainMenuBar();
+        if (c.igBeginMainMenuBar()) {
+            defer c.igEndMainMenuBar();
 
-        //     if (c.igBeginMenu("File", true)) {
-        //         defer c.igEndMenu();
+            if (c.igBeginMenu("File", true)) {
+                defer c.igEndMenu();
 
-        //         std.debug.print("Size: {}\n", .{@as(i32, @intFromFloat(c.igGetFrameHeight()))});
+                std.debug.print("Size: {}\n", .{@as(i32, @intFromFloat(c.igGetFrameHeight()))});
 
-        //         if (c.igMenuItem_Bool("Save", "", false, true)) {
-        //             std.debug.print("Save\n", .{});
-        //         }
-        //         if (c.igMenuItem_Bool("Open", "", false, true)) {
-        //             std.debug.print("Open\n", .{});
-        //         }
-        //     }
-        // }
+                if (c.igMenuItem_Bool("Save", "", false, true)) {
+                    std.debug.print("Save\n", .{});
+                }
+                if (c.igMenuItem_Bool("Open", "", false, true)) {
+                    std.debug.print("Open\n", .{});
+                }
+            }
+        }
 
-        // c.igShowDemoWindow(null);
+        c.igShowDemoWindow(null);
 
         // const fill = skia.sk_paint_new();
         // defer skia.sk_paint_delete(fill);
@@ -81,7 +81,7 @@ pub fn main() !void {
         // skia.sk_canvas_draw_rect(skia.getNative(), &rect, fill);
 
         // skia.draw();
-        // try imgui.draw();
+        try imgui.draw();
 
         try window.draw();
     }

@@ -38,7 +38,7 @@ pub fn init(alloc_root: std.mem.Allocator) !void {
     try std.testing.expect(formats.len > 0);
 
     for (formats) |value| {
-        if (value.format == c.VK_FORMAT_B8G8R8A8_SRGB and value.colorSpace == c.VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+        if (value.format == c.VK_FORMAT_B8G8R8A8_UNORM and value.colorSpace == c.VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
             format = value;
             break;
         }
