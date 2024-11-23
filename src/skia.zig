@@ -62,8 +62,6 @@ pub fn init() !void {
         .fVkExtensions = extensions,
         .fDeviceFeatures2 = @as(*skia.vk_physical_device_features_2_t, @ptrCast(&features)),
         .fGetProc = getProc,
-        .fOwnsInstanceAndDevice = false,
-        .fProtectedContext = false,
     });
 
     std.debug.print("Init context\n", .{});

@@ -7,7 +7,10 @@ const window = @import("../window.zig");
 const util = @import("util.zig");
 
 pub var instance: c.VkInstance = undefined;
-pub const layers: []const [*]const u8 = &.{"VK_LAYER_KHRONOS_validation"};
+
+pub const layers: []const [*]const u8 = &.{
+    "VK_LAYER_KHRONOS_validation",
+};
 pub var extensions: []?[*]const u8 = undefined;
 
 pub fn init() !void {

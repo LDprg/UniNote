@@ -5,9 +5,8 @@ const vulkan = @import("vulkan.zig");
 const c = @import("c.zig");
 
 var sdl_window: ?*c.SDL_Window = undefined;
-pub var surface: c.VkSurfaceKHR = undefined;
 
-pub const size = struct { x: i32, y: i32 };
+pub const size = struct { x: u32, y: u32 };
 pub const event = enum(u32) { quit = c.SDL_EVENT_QUIT };
 
 pub fn init(alloc: std.mem.Allocator, x: i32, y: i32) !void {
@@ -32,16 +31,9 @@ pub fn init(alloc: std.mem.Allocator, x: i32, y: i32) !void {
     }
 
     try vulkan.init(alloc);
-
-    // Create Window Surface
-    const surface_init = c.SDL_Vulkan_CreateSurface(sdl_window, vulkan.instance.instance, null, &surface);
-    if (!surface_init) {
-        std.debug.panic("Failed to create Vulkan surface.\n", .{});
-    }
 }
 
 pub fn deinit() void {
-    c.SDL_Vulkan_DestroySurface(vulkan.instance.instance, surface, null);
     vulkan.deinit();
 
     c.SDL_DestroyWindow(sdl_window);
@@ -66,8 +58,8 @@ pub fn showWindow() void {
 }
 
 pub fn getSize() size {
-    var x: i32 = 0;
-    var y: i32 = 0;
+    var x: u32 = 0;
+    var y: u32 = 0;
 
     _ = c.SDL_GetWindowSize(sdl_window, @ptrCast(&x), @ptrCast(&y));
 
