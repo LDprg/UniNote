@@ -33,7 +33,6 @@ pub fn init() !void {
     // Select Surface Format
     const requestSurfaceImageFormat: []const c.VkFormat = &.{
         c.VK_FORMAT_B8G8R8A8_UNORM,
-        c.VK_FORMAT_R8G8B8A8_UNORM,
     };
     const requestSurfaceColorSpace: c.VkColorSpaceKHR = c.VK_COLORSPACE_SRGB_NONLINEAR_KHR;
     g_MainWindowData.SurfaceFormat = c.ImGui_ImplVulkanH_SelectSurfaceFormat(
@@ -53,8 +52,6 @@ pub fn init() !void {
         present_modes.len,
     );
 
-    std.debug.print("Present mode: {}\n", .{g_MainWindowData.PresentMode});
-
     // Create SwapChain, RenderPass, Framebuffer, etc.
     try std.testing.expect(g_MinImageCount >= 2);
 
@@ -72,7 +69,7 @@ pub fn init() !void {
         g_MinImageCount,
     );
 
-    std.debug.print("Init Imgui", .{});
+    std.debug.print("Init Imgui\n", .{});
 
     context = c.igCreateContext(null);
 
@@ -147,6 +144,7 @@ pub fn init() !void {
     try vulkan.check_vk(c.vkQueueSubmit(vulkan.g_Queue, 1, &end_info, null));
 
     try vulkan.check_vk(c.vkDeviceWaitIdle(vulkan.g_Device));
+
     _ = c.ImGui_ImplVulkan_DestroyFontsTexture();
 }
 
@@ -253,6 +251,9 @@ pub fn draw() !void {
 }
 
 fn vkRender(draw_data: *c.ImDrawData) !void {
+    const fd = &g_MainWindowData.Frames[g_MainWindowData.FrameIndex];
+    try vulkan.check_vk(c.vkWaitForFences(vulkan.g_Device, 1, &fd.Fence, c.VK_TRUE, c.UINT64_MAX)); // wait indefinitely instead of periodically checking
+
     const image_acquired_semaphore: c.VkSemaphore = g_MainWindowData.FrameSemaphores[g_MainWindowData.SemaphoreIndex].ImageAcquiredSemaphore;
     const render_complete_semaphore: c.VkSemaphore = g_MainWindowData.FrameSemaphores[g_MainWindowData.SemaphoreIndex].RenderCompleteSemaphore;
     const err: c.VkResult = c.vkAcquireNextImageKHR(vulkan.g_Device, g_MainWindowData.Swapchain, c.UINT64_MAX, image_acquired_semaphore, null, &g_MainWindowData.FrameIndex);
@@ -261,9 +262,6 @@ fn vkRender(draw_data: *c.ImDrawData) !void {
         return;
     }
     try vulkan.check_vk(err);
-
-    const fd = &g_MainWindowData.Frames[g_MainWindowData.FrameIndex];
-    try vulkan.check_vk(c.vkWaitForFences(vulkan.g_Device, 1, &fd.Fence, c.VK_TRUE, c.UINT64_MAX)); // wait indefinitely instead of periodically checking
 
     try vulkan.check_vk(c.vkResetFences(vulkan.g_Device, 1, &fd.Fence));
 

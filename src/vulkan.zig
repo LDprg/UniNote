@@ -18,6 +18,8 @@ pub var g_CommandBuffer: c.VkCommandBuffer = undefined;
 
 pub var g_SwapChainRebuild = false;
 
+pub var device_extensions: []?[*]const u8 = undefined;
+
 pub fn init(alloc: std.mem.Allocator) !void {
     std.debug.print("Init Vulkan\n", .{});
 
@@ -26,12 +28,20 @@ pub fn init(alloc: std.mem.Allocator) !void {
     const arena = arena_state.allocator();
 
     // Enabling validation layers
-    // const layers: []const [*]const u8 = &.{"VK_LAYER_KHRONOS_validation"};
-    const layers: []const [*]const u8 = &.{};
+    const layers: []const [*]const u8 = &.{"VK_LAYER_KHRONOS_validation"};
+    // const layers: []const [*]const u8 = &.{};
+
+    const appInfo = std.mem.zeroInit(c.VkApplicationInfo, .{
+        .sType = c.VK_STRUCTURE_TYPE_APPLICATION_INFO,
+        .apiVersion = c.VK_API_VERSION_1_1,
+        .pApplicationName = window.getWindowTitle(),
+        .pEngineName = "No Engine",
+    });
 
     // Vk Instance
     const inst_create_info = std.mem.zeroInit(c.VkInstanceCreateInfo, .{
         .sType = c.VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+        .pApplicationInfo = &appInfo,
         .enabledExtensionCount = @as(u32, @intCast(window.extensions.len)),
         .ppEnabledExtensionNames = window.extensions.ptr,
         .enabledLayerCount = @as(u32, @intCast(layers.len)),
@@ -81,12 +91,13 @@ pub fn init(alloc: std.mem.Allocator) !void {
     try std.testing.expect(g_QueueFamily != null);
 
     // Create Logical Device (with 1 queue)
-    const device_extension_count = 1;
-    const device_extensions: []const [*]const u8 = &.{"VK_KHR_swapchain"};
+    device_extensions = try arena.alloc(?[*]const u8, 1);
+    device_extensions[0] = "VK_KHR_swapchain";
     const queue_priority: []const f32 = &.{1.0};
 
     const queue_info: []const c.VkDeviceQueueCreateInfo = &.{.{
         .sType = c.VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+        .pNext = null,
         .queueFamilyIndex = g_QueueFamily.?,
         .queueCount = 1,
         .pQueuePriorities = queue_priority.ptr,
@@ -94,9 +105,10 @@ pub fn init(alloc: std.mem.Allocator) !void {
 
     const create_info = std.mem.zeroInit(c.VkDeviceCreateInfo, .{
         .sType = c.VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+        .pNext = null,
         .queueCreateInfoCount = @as(u32, @intCast(queue_info.len)),
         .pQueueCreateInfos = queue_info.ptr,
-        .enabledExtensionCount = device_extension_count,
+        .enabledExtensionCount = @as(u32, @intCast(device_extensions.len)),
         .ppEnabledExtensionNames = device_extensions.ptr,
     });
 

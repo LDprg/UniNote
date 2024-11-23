@@ -6,7 +6,7 @@ const c = @import("c.zig");
 
 var sdl_window: ?*c.SDL_Window = undefined;
 pub var surface: c.VkSurfaceKHR = undefined;
-pub var extensions: []const ?[*]const u8 = undefined;
+pub var extensions: []?[*]const u8 = undefined;
 
 pub const size = struct { x: i32, y: i32 };
 pub const event = enum(u32) { quit = c.SDL_EVENT_QUIT };
@@ -34,7 +34,7 @@ pub fn init(alloc: std.mem.Allocator, x: i32, y: i32) !void {
 
     var extensions_count: u32 = 0;
     _ = c.SDL_Vulkan_GetInstanceExtensions(&extensions_count);
-    extensions = c.SDL_Vulkan_GetInstanceExtensions(&extensions_count)[0..extensions_count];
+    extensions = @constCast(c.SDL_Vulkan_GetInstanceExtensions(&extensions_count)[0..extensions_count]);
 
     try vulkan.init(alloc);
 
@@ -46,8 +46,8 @@ pub fn init(alloc: std.mem.Allocator, x: i32, y: i32) !void {
 }
 
 pub fn deinit() void {
+    c.SDL_Vulkan_DestroySurface(vulkan.g_Instance, surface, vulkan.g_Allocator);
     vulkan.deinit();
-    // c.SDL_Vulkan_DestroySurface(vulkan.g_Instance, surface, vulkan.g_Allocator);
 
     c.SDL_DestroyWindow(sdl_window);
     c.SDL_Quit();
