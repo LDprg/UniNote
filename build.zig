@@ -46,7 +46,16 @@ pub fn build(b: *std.Build) void {
     exe.addCSourceFiles(.{
         .root = cimgui_dep.path(""),
         .flags = &.{"-DIMGUI_IMPL_API=extern \"C\""},
-        .files = &.{ "cimgui.cpp", "imgui/imgui.cpp", "imgui/imgui_widgets.cpp", "imgui/imgui_draw.cpp", "imgui/imgui_tables.cpp", "imgui/imgui_demo.cpp", "imgui/backends/imgui_impl_sdl3.cpp", "imgui/backends/imgui_impl_vulkan.cpp" },
+        .files = &.{
+            "cimgui.cpp",
+            "imgui/imgui.cpp",
+            "imgui/imgui_widgets.cpp",
+            "imgui/imgui_draw.cpp",
+            "imgui/imgui_tables.cpp",
+            "imgui/imgui_demo.cpp",
+            "imgui/backends/imgui_impl_sdl3.cpp",
+            "imgui/backends/imgui_impl_vulkan.cpp",
+        },
     });
 
     // SDL3
@@ -70,7 +79,12 @@ pub fn build(b: *std.Build) void {
     run_step.dependOn(gen_proto);
     run_step.dependOn(&run_cmd.step);
 
-    const resources = b.addInstallDirectory(.{ .include_extensions = &.{".ttf"}, .source_dir = b.path("res"), .install_dir = .prefix, .install_subdir = "bin/res" });
+    const resources = b.addInstallDirectory(.{
+        .include_extensions = &.{".ttf"},
+        .source_dir = b.path("res"),
+        .install_dir = .prefix,
+        .install_subdir = "bin/res",
+    });
 
     b.getInstallStep().dependOn(&resources.step);
 }

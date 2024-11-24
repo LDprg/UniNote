@@ -1,4 +1,7 @@
 #!/usr/bin/bash
 
-glslc ./shader/test.vert -o ./shader/test.vert.spv
-glslc ./shader/test.frag -o ./shader/test.frag.spv
+# glslc ./shaders/test.vert -o ./shaders/test.vert.spv
+# glslc ./shaders/test.frag -o ./shaders/test.frag.spv
+naga ./shaders/test.vert ./shaders/test.vert.spv --input-kind glsl --shader-stage vert
+naga ./shaders/test.frag ./shaders/test.frag.spv --input-kind glsl --shader-stage frag
+
