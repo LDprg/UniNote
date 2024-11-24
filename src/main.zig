@@ -6,7 +6,6 @@ const window = @import("window.zig");
 const imgui = @import("imgui.zig");
 const protobuf = @import("protobuf.zig");
 const event = @import("event.zig");
-const skia = @import("skia.zig");
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
@@ -22,9 +21,6 @@ pub fn main() !void {
 
     try imgui.init();
     defer imgui.deinit() catch std.debug.panic("Imgui deinit failed", .{});
-
-    try skia.init();
-    defer skia.deinit();
 
     try protobuf.init(alloc);
     defer protobuf.deinit();
@@ -56,7 +52,7 @@ pub fn main() !void {
             if (c.igBeginMenu("File", true)) {
                 defer c.igEndMenu();
 
-                std.debug.print("Size: {}\n", .{@as(i32, @intFromFloat(c.igGetFrameHeight()))});
+                // std.debug.print("Size: {}\n", .{@as(i32, @intFromFloat(c.igGetFrameHeight()))});
 
                 if (c.igMenuItem_Bool("Save", "", false, true)) {
                     std.debug.print("Save\n", .{});
@@ -69,20 +65,8 @@ pub fn main() !void {
 
         c.igShowDemoWindow(null);
 
-        // const fill = skia.sk_paint_new();
-        // defer skia.sk_paint_delete(fill);
-        // skia.sk_paint_set_color(fill, 0xff0000ff);
-        // const rect = skia.sk_rect_t{
-        //     .left = x,
-        //     .bottom = y,
-        //     .right = x + 100,
-        //     .top = y + 100,
-        // };
-        // skia.sk_canvas_draw_rect(skia.getNative(), &rect, fill);
-
         try window.clear();
 
-        // skia.draw();
         try imgui.draw();
 
         try window.draw();
