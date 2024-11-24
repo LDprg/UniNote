@@ -15,6 +15,7 @@ pub const renderPass = @import("vulkan/renderPass.zig");
 pub const frameBuffer = @import("vulkan/frameBuffer.zig");
 pub const commandBuffer = @import("vulkan/commandBuffer.zig");
 pub const syncObjects = @import("vulkan/syncObjects.zig");
+pub const shaders = @import("vulkan/shaders.zig");
 
 pub var imageIndex: u32 = undefined;
 
@@ -39,6 +40,7 @@ pub fn init(alloc: std.mem.Allocator) !void {
     try frameBuffer.init(arena);
     try commandBuffer.init();
     try syncObjects.init();
+    try shaders.init(arena);
 }
 
 pub fn deinit() void {

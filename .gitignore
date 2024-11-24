@@ -7,3 +7,5 @@ src/proto
 
 /test.*
 /imgui.ini
+
+/shaders/*.spv
