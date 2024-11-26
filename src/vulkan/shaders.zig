@@ -5,7 +5,11 @@ const c = @import("../c.zig");
 const util = @import("util.zig");
 const device = @import("device.zig");
 
+pub var shaderStages: []c.VkPipelineShaderStageCreateInfo = undefined;
 pub var alloc: std.mem.Allocator = undefined;
+
+var vertShaderModule: c.VkShaderModule = undefined;
+var fragShaderModule: c.VkShaderModule = undefined;
 
 pub fn init(alloc_root: std.mem.Allocator) !void {
     alloc = alloc_root;
@@ -13,9 +17,29 @@ pub fn init(alloc_root: std.mem.Allocator) !void {
     const vertShaderCode = try loadShader("shaders/test.vert.spv");
     const fragShaderCode = try loadShader("shaders/test.frag.spv");
 
-    const vertShaderModule = try createShaderModule(vertShaderCode);
-    const fragShaderModule = try createShaderModule(fragShaderCode);
+    vertShaderModule = try createShaderModule(vertShaderCode);
+    fragShaderModule = try createShaderModule(fragShaderCode);
 
+    const vertShaderStageInfo = c.VkPipelineShaderStageCreateInfo{
+        .sType = c.VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+        .stage = c.VK_SHADER_STAGE_VERTEX_BIT,
+        .module = vertShaderModule,
+        .pName = "main",
+    };
+
+    const fragShaderStageInfo = c.VkPipelineShaderStageCreateInfo{
+        .sType = c.VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+        .stage = c.VK_SHADER_STAGE_FRAGMENT_BIT,
+        .module = fragShaderModule,
+        .pName = "main",
+    };
+
+    shaderStages = try alloc.alloc(c.VkPipelineShaderStageCreateInfo, 2);
+    shaderStages[0] = vertShaderStageInfo;
+    shaderStages[1] = fragShaderStageInfo;
+}
+
+pub fn deinit() void {
     c.vkDestroyShaderModule(device.device, fragShaderModule, null);
     c.vkDestroyShaderModule(device.device, vertShaderModule, null);
 }

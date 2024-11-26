@@ -87,12 +87,14 @@ pub fn init() !void {
         .CheckVkResultFn = vulkan.util.check_vk_c,
     };
     _ = c.ImGui_ImplVulkan_Init(&init_info);
+    _ = c.ImGui_ImplVulkan_CreateFontsTexture();
 }
 
 pub fn deinit() !void {
     std.debug.print("Deinit imgui\n", .{});
     _ = c.vkDeviceWaitIdle(vulkan.device.device);
 
+    _ = c.ImGui_ImplVulkan_DestroyFontsTexture();
     c.ImGui_ImplVulkan_Shutdown();
     c.ImGui_ImplSDL3_Shutdown();
 

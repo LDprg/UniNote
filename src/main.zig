@@ -7,6 +7,8 @@ const imgui = @import("imgui.zig");
 const protobuf = @import("protobuf.zig");
 const event = @import("event.zig");
 
+const vulkan = @import("vulkan.zig");
+
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer {
@@ -55,7 +57,7 @@ pub fn main() !void {
                 // std.debug.print("Size: {}\n", .{@as(i32, @intFromFloat(c.igGetFrameHeight()))});
 
                 if (c.igMenuItem_Bool("Save", "", false, true)) {
-                    std.debug.print("Save\n", .{});
+                    std.debug.print("Save: {}\n", .{vulkan.swapChain.extent});
                 }
                 if (c.igMenuItem_Bool("Open", "", false, true)) {
                     std.debug.print("Open\n", .{});

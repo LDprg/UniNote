@@ -16,6 +16,7 @@ pub const frameBuffer = @import("vulkan/frameBuffer.zig");
 pub const commandBuffer = @import("vulkan/commandBuffer.zig");
 pub const syncObjects = @import("vulkan/syncObjects.zig");
 pub const shaders = @import("vulkan/shaders.zig");
+pub const pipeline = @import("vulkan/pipeline.zig");
 
 pub var imageIndex: u32 = undefined;
 
@@ -37,10 +38,11 @@ pub fn init(alloc: std.mem.Allocator) !void {
     try swapChain.init(arena);
     try imageView.init(arena);
     try renderPass.init();
+    try shaders.init(arena);
+    try pipeline.init();
     try frameBuffer.init(arena);
     try commandBuffer.init();
     try syncObjects.init();
-    try shaders.init(arena);
 }
 
 pub fn deinit() void {
@@ -49,6 +51,8 @@ pub fn deinit() void {
     syncObjects.deinit();
     commandBuffer.deinit();
     frameBuffer.deinit();
+    pipeline.deinit();
+    shaders.deinit();
     renderPass.deinit();
     imageView.deinit();
     swapChain.deinit();
@@ -89,6 +93,26 @@ pub fn clear() !void {
     try util.check_vk(c.vkResetCommandBuffer(commandBuffer.commandBuffer, 0));
 
     try commandBuffer.beginCommandBuffer(commandBuffer.commandBuffer, imageIndex);
+
+    c.vkCmdBindPipeline(commandBuffer.commandBuffer, c.VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.graphicsPipeline);
+
+    const viewport = c.VkViewport{
+        .x = 0.0,
+        .y = 0.0,
+        .width = @floatFromInt(swapChain.extent.width),
+        .height = @floatFromInt(swapChain.extent.height),
+        .minDepth = 0.0,
+        .maxDepth = 1.0,
+    };
+    c.vkCmdSetViewport(commandBuffer.commandBuffer, 0, 1, &viewport);
+
+    const scissor = c.VkRect2D{
+        .offset = .{ .x = 0, .y = 0 },
+        .extent = swapChain.extent,
+    };
+    c.vkCmdSetScissor(commandBuffer.commandBuffer, 0, 1, &scissor);
+
+    c.vkCmdDraw(commandBuffer.commandBuffer, 3, 1, 0, 0);
 }
 
 pub fn draw() !void {
