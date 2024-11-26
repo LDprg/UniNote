@@ -19,6 +19,7 @@ pub const shaders = @import("vulkan/shaders.zig");
 pub const pipeline = @import("vulkan/pipeline.zig");
 
 pub var imageIndex: u32 = undefined;
+pub var currentFrame: u32 = 0;
 
 var arena_state: std.heap.ArenaAllocator = undefined;
 var arena: std.mem.Allocator = undefined;
@@ -76,10 +77,10 @@ pub fn recreateSwapChain() !void {
 }
 
 pub fn clear() !void {
-    try util.check_vk(c.vkWaitForFences(device.device, 1, &syncObjects.inFlightFence, c.VK_TRUE, c.UINT64_MAX));
+    try util.check_vk(c.vkWaitForFences(device.device, 1, &syncObjects.inFlightFences[currentFrame], c.VK_TRUE, c.UINT64_MAX));
 
     {
-        const res = c.vkAcquireNextImageKHR(device.device, swapChain.swapChain, c.UINT64_MAX, syncObjects.imageAvailableSemaphore, null, &imageIndex);
+        const res = c.vkAcquireNextImageKHR(device.device, swapChain.swapChain, c.UINT64_MAX, syncObjects.imageAvailableSemaphores[currentFrame], null, &imageIndex);
 
         if (res == c.VK_ERROR_OUT_OF_DATE_KHR) {
             try recreateSwapChain();
@@ -89,12 +90,12 @@ pub fn clear() !void {
         }
     }
 
-    try util.check_vk(c.vkResetFences(device.device, 1, &syncObjects.inFlightFence));
-    try util.check_vk(c.vkResetCommandBuffer(commandBuffer.commandBuffer, 0));
+    try util.check_vk(c.vkResetFences(device.device, 1, &syncObjects.inFlightFences[currentFrame]));
+    try util.check_vk(c.vkResetCommandBuffer(commandBuffer.commandBuffers[currentFrame], 0));
 
-    try commandBuffer.beginCommandBuffer(commandBuffer.commandBuffer, imageIndex);
+    try commandBuffer.beginCommandBuffer(commandBuffer.commandBuffers[currentFrame], imageIndex);
 
-    c.vkCmdBindPipeline(commandBuffer.commandBuffer, c.VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.graphicsPipeline);
+    c.vkCmdBindPipeline(commandBuffer.commandBuffers[currentFrame], c.VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.graphicsPipeline);
 
     const viewport = c.VkViewport{
         .x = 0.0,
@@ -104,23 +105,23 @@ pub fn clear() !void {
         .minDepth = 0.0,
         .maxDepth = 1.0,
     };
-    c.vkCmdSetViewport(commandBuffer.commandBuffer, 0, 1, &viewport);
+    c.vkCmdSetViewport(commandBuffer.commandBuffers[currentFrame], 0, 1, &viewport);
 
     const scissor = c.VkRect2D{
         .offset = .{ .x = 0, .y = 0 },
         .extent = swapChain.extent,
     };
-    c.vkCmdSetScissor(commandBuffer.commandBuffer, 0, 1, &scissor);
+    c.vkCmdSetScissor(commandBuffer.commandBuffers[currentFrame], 0, 1, &scissor);
 
-    c.vkCmdDraw(commandBuffer.commandBuffer, 3, 1, 0, 0);
+    c.vkCmdDraw(commandBuffer.commandBuffers[currentFrame], 3, 1, 0, 0);
 }
 
 pub fn draw() !void {
-    try commandBuffer.endCommandBuffer(commandBuffer.commandBuffer);
+    try commandBuffer.endCommandBuffer(commandBuffer.commandBuffers[currentFrame]);
 
-    const waitSemaphores: []const c.VkSemaphore = &.{syncObjects.imageAvailableSemaphore};
+    const waitSemaphores: []const c.VkSemaphore = &.{syncObjects.imageAvailableSemaphores[currentFrame]};
     const waitStages: []const c.VkPipelineStageFlags = &.{c.VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-    const signalSemaphores: []const c.VkSemaphore = &.{syncObjects.renderFinishedSemaphore};
+    const signalSemaphores: []const c.VkSemaphore = &.{syncObjects.renderFinishedSemaphores[currentFrame]};
 
     var submitInfo = c.VkSubmitInfo{
         .sType = c.VK_STRUCTURE_TYPE_SUBMIT_INFO,
@@ -128,12 +129,12 @@ pub fn draw() !void {
         .pWaitSemaphores = waitSemaphores.ptr,
         .pWaitDstStageMask = waitStages.ptr,
         .commandBufferCount = 1,
-        .pCommandBuffers = &commandBuffer.commandBuffer,
+        .pCommandBuffers = &commandBuffer.commandBuffers[currentFrame],
         .signalSemaphoreCount = @intCast(signalSemaphores.len),
         .pSignalSemaphores = signalSemaphores.ptr,
     };
 
-    try util.check_vk(c.vkQueueSubmit(queue.graphicsQueue, 1, &submitInfo, syncObjects.inFlightFence));
+    try util.check_vk(c.vkQueueSubmit(queue.graphicsQueue, 1, &submitInfo, syncObjects.inFlightFences[currentFrame]));
 
     // Present
     const swapChains: []const c.VkSwapchainKHR = &.{swapChain.swapChain};
@@ -156,4 +157,6 @@ pub fn draw() !void {
             try util.check_vk(res);
         }
     }
+
+    currentFrame = (currentFrame + 1) % util.maxFramesInFligth;
 }

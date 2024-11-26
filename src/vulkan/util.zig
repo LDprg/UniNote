@@ -2,11 +2,14 @@ const std = @import("std");
 
 const c = @import("../c.zig");
 
+pub const maxFramesInFligth = 2;
+
 pub fn check_vk_c(result: c.VkResult) callconv(.C) void {
     check_vk(result) catch |err| {
         std.debug.panic("VK ERROR: {}", .{err});
     };
 }
+
 pub fn check_vk(result: c.VkResult) !void {
     return switch (result) {
         c.VK_SUCCESS => {},

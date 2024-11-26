@@ -10,7 +10,7 @@ const frameBuffer = @import("frameBuffer.zig");
 const swapChain = @import("swapChain.zig");
 
 pub var commandPool: c.VkCommandPool = undefined;
-pub var commandBuffer: c.VkCommandBuffer = undefined;
+pub var commandBuffers: [util.maxFramesInFligth]c.VkCommandBuffer = undefined;
 
 pub fn init() !void {
     const poolInfo = c.VkCommandPoolCreateInfo{
@@ -25,10 +25,10 @@ pub fn init() !void {
         .sType = c.VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
         .commandPool = commandPool,
         .level = c.VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-        .commandBufferCount = 1,
+        .commandBufferCount = util.maxFramesInFligth,
     };
 
-    try util.check_vk(c.vkAllocateCommandBuffers(device.device, &allocInfo, &commandBuffer));
+    try util.check_vk(c.vkAllocateCommandBuffers(device.device, &allocInfo, &commandBuffers));
 }
 
 pub fn deinit() void {

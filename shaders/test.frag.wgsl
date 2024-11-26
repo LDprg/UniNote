@@ -1,4 +1,4 @@
 @fragment 
-fn main(@location(0) fragColor: vec3<f32>) -> @location(0) vec4<f32> {
-    return vec4<f32>(fragColor.x, fragColor.y, fragColor.z, 1.0);
+fn main(@location(0) color: vec4<f32>) -> @location(0) vec4<f32> {
+    return vec4<f32>(color.r, color.g, color.b, color.a);
 }

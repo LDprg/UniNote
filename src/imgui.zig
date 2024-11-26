@@ -162,5 +162,5 @@ pub fn update() void {
 pub fn draw() !void {
     c.igRender();
 
-    c.ImGui_ImplVulkan_RenderDrawData(c.igGetDrawData(), vulkan.commandBuffer.commandBuffer, null);
+    c.ImGui_ImplVulkan_RenderDrawData(c.igGetDrawData(), vulkan.commandBuffer.commandBuffers[vulkan.currentFrame], null);
 }
