@@ -12,10 +12,8 @@ struct UniformInput {
 @vertex 
 fn main(@location(0) positions: vec2f, 
         @location(1) colors: vec4f) -> VertexOutput {
-    var position = positions* UBO.scale;
-
     var output: VertexOutput;
-    output.position = vec4f(position.x, position.y, 0.0, 1.0);
+    output.position = vec4f((2.0*positions.x/UBO.scale.x)-1.0, (2.0*positions.y/UBO.scale.y)-1.0, 0.0, 1.0);
     output.colors = colors;
     return output;
 }

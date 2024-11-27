@@ -145,10 +145,10 @@ fn createIndexBuffer() !void {
 
 pub fn init() !void {
     var vert = [_]Vertex{
-        Vertex{ .pos = [2]f32{ -0.5, -0.5 }, .color = [4]f32{ 1, 0, 0, 1 } },
-        Vertex{ .pos = [2]f32{ 0.5, -0.5 }, .color = [4]f32{ 0, 1, 0, 1 } },
-        Vertex{ .pos = [2]f32{ 0.5, 0.5 }, .color = [4]f32{ 0, 0, 1, 1 } },
-        Vertex{ .pos = [2]f32{ -0.5, 0.5 }, .color = [4]f32{ 1, 0, 1, 1 } },
+        Vertex{ .pos = [2]f32{ 100, 100 }, .color = [4]f32{ 1, 0, 0, 1 } },
+        Vertex{ .pos = [2]f32{ 500, 100 }, .color = [4]f32{ 0, 1, 0, 1 } },
+        Vertex{ .pos = [2]f32{ 500, 500 }, .color = [4]f32{ 0, 0, 1, 1 } },
+        Vertex{ .pos = [2]f32{ 100, 500 }, .color = [4]f32{ 1, 0, 1, 1 } },
     };
     vertices = vert[0..];
 

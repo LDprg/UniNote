@@ -23,6 +23,8 @@ pub const pipeline = @import("vulkan/pipeline.zig");
 pub const vertexBuffer = @import("vulkan/vertexBuffer.zig");
 pub const descriptorSetLayout = @import("vulkan/descriptorSetLayout.zig");
 pub const uniformBuffers = @import("vulkan/uniformBuffers.zig");
+pub const descriptorPool = @import("vulkan/descriptorPool.zig");
+pub const descriptorSets = @import("vulkan/descriptorSets.zig");
 
 pub var imageIndex: u32 = undefined;
 pub var currentFrame: u32 = 0;
@@ -56,11 +58,14 @@ pub fn init(alloc: std.mem.Allocator) !void {
     try syncObjects.init();
     try vertexBuffer.init();
     try uniformBuffers.init(arena);
+    try descriptorPool.init();
+    try descriptorSets.init(arena);
 }
 
 pub fn deinit() void {
     _ = c.vkDeviceWaitIdle(device.device);
 
+    descriptorPool.deinit();
     uniformBuffers.deinit();
     vertexBuffer.deinit();
     syncObjects.deinit();
@@ -134,15 +139,17 @@ pub fn clear() !void {
     };
     c.vkCmdSetScissor(commandBuffer.commandBuffers[currentFrame], 0, 1, &scissor);
 
+    c.vkCmdBindDescriptorSets(commandBuffer.commandBuffers[currentFrame], c.VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipelineLayout, 0, 1, &descriptorSets.descriptorSets[currentFrame], 0, null);
+
     c.vkCmdDrawIndexed(commandBuffer.commandBuffers[currentFrame], @intCast(vertexBuffer.indices.len), 1, 0, 0, 0);
 }
 
 pub fn draw() !void {
-    var ubo = uniformBuffers.UniformBufferObject{
-        .scale = [2]f32{ 1, 1 },
-    };
+    var ubo = [_]uniformBuffers.UniformBufferObject{uniformBuffers.UniformBufferObject{
+        .scale = [2]f32{ @floatFromInt(swapChain.extent.width), @floatFromInt(swapChain.extent.height) },
+    }};
 
-    uniformBuffers.uniformBuffersAllocInfo[currentFrame].pMappedData = @ptrCast(&ubo);
+    @memcpy(@as([*]uniformBuffers.UniformBufferObject, @ptrCast(@alignCast(uniformBuffers.uniformBuffersAllocInfo[currentFrame].pMappedData))), &ubo);
 
     try commandBuffer.endCommandBuffer(commandBuffer.commandBuffers[currentFrame]);
 
