@@ -52,7 +52,7 @@ pub const Vertex = struct {
 pub var vertices: []Vertex = undefined;
 pub var indices: []u16 = undefined;
 
-fn createBuffer(size: c.VkDeviceSize, usage: c.VkBufferUsageFlags, flags: c.VmaAllocationCreateFlags, buffer: *c.VkBuffer, bufferAlloc: *c.VmaAllocation, bufferAllocInfo: ?*c.VmaAllocationInfo) !void {
+pub fn createBuffer(size: c.VkDeviceSize, usage: c.VkBufferUsageFlags, flags: c.VmaAllocationCreateFlags, buffer: *c.VkBuffer, bufferAlloc: *c.VmaAllocation, bufferAllocInfo: ?*c.VmaAllocationInfo) !void {
     const bufferInfo = c.VkBufferCreateInfo{
         .sType = c.VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
         .size = size,
@@ -143,7 +143,7 @@ fn createIndexBuffer() !void {
     c.vmaDestroyBuffer(allocator.allocator, stagingBuffer, stagingBufferAlloc);
 }
 
-pub fn init(_: std.mem.Allocator) !void {
+pub fn init() !void {
     var vert = [_]Vertex{
         Vertex{ .pos = [2]f32{ -0.5, -0.5 }, .color = [4]f32{ 1, 0, 0, 1 } },
         Vertex{ .pos = [2]f32{ 0.5, -0.5 }, .color = [4]f32{ 0, 1, 0, 1 } },

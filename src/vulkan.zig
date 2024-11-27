@@ -21,6 +21,8 @@ pub const syncObjects = @import("vulkan/syncObjects.zig");
 pub const shaders = @import("vulkan/shaders.zig");
 pub const pipeline = @import("vulkan/pipeline.zig");
 pub const vertexBuffer = @import("vulkan/vertexBuffer.zig");
+pub const descriptorSetLayout = @import("vulkan/descriptorSetLayout.zig");
+pub const uniformBuffers = @import("vulkan/uniformBuffers.zig");
 
 pub var imageIndex: u32 = undefined;
 pub var currentFrame: u32 = 0;
@@ -47,21 +49,25 @@ pub fn init(alloc: std.mem.Allocator) !void {
     try imageView.init(arena);
     try renderPass.init();
     try shaders.init(arena);
+    try descriptorSetLayout.init();
     try pipeline.init(arena);
     try frameBuffer.init(arena);
     try commandBuffer.init();
     try syncObjects.init();
-    try vertexBuffer.init(arena);
+    try vertexBuffer.init();
+    try uniformBuffers.init(arena);
 }
 
 pub fn deinit() void {
     _ = c.vkDeviceWaitIdle(device.device);
 
+    uniformBuffers.deinit();
     vertexBuffer.deinit();
     syncObjects.deinit();
     commandBuffer.deinit();
     frameBuffer.deinit();
     pipeline.deinit();
+    descriptorSetLayout.deinit();
     shaders.deinit();
     renderPass.deinit();
     imageView.deinit();
@@ -132,6 +138,12 @@ pub fn clear() !void {
 }
 
 pub fn draw() !void {
+    var ubo = uniformBuffers.UniformBufferObject{
+        .scale = [2]f32{ 1, 1 },
+    };
+
+    uniformBuffers.uniformBuffersAllocInfo[currentFrame].pMappedData = @ptrCast(&ubo);
+
     try commandBuffer.endCommandBuffer(commandBuffer.commandBuffers[currentFrame]);
 
     const waitSemaphores: []const c.VkSemaphore = &.{syncObjects.imageAvailableSemaphores[currentFrame]};

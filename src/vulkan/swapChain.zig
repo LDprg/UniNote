@@ -121,8 +121,4 @@ pub fn init(alloc_root: std.mem.Allocator) !void {
 
 pub fn deinit() void {
     c.vkDestroySwapchainKHR(device.device, swapChain, null);
-
-    alloc.free(swapChainImages);
-    alloc.free(presentModes);
-    alloc.free(formats);
 }

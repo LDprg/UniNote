@@ -8,6 +8,7 @@ const swapChain = @import("swapChain.zig");
 const renderPass = @import("renderPass.zig");
 const shaders = @import("shaders.zig");
 const vertexBuffer = @import("vertexBuffer.zig");
+const descriptorSetLayout = @import("descriptorSetLayout.zig");
 
 const dynamicStates: []const c.VkDynamicState = &.{
     c.VK_DYNAMIC_STATE_VIEWPORT,
@@ -109,8 +110,8 @@ pub fn init(alloc: std.mem.Allocator) !void {
 
     const pipelineLayoutInfo = c.VkPipelineLayoutCreateInfo{
         .sType = c.VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-        .setLayoutCount = 0,
-        .pSetLayouts = null,
+        .setLayoutCount = 1,
+        .pSetLayouts = &descriptorSetLayout.descriptorSetLayout,
         .pushConstantRangeCount = 0,
         .pPushConstantRanges = null,
     };

@@ -36,6 +36,4 @@ pub fn deinit() void {
     for (swapChainFramebuffers) |framebuffer| {
         c.vkDestroyFramebuffer(device.device, framebuffer, null);
     }
-
-    alloc.free(swapChainFramebuffers);
 }
