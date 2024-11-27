@@ -75,6 +75,17 @@ pub fn build(b: *std.Build) !void {
     // Vulkan
     exe.linkSystemLibrary("vulkan");
 
+    // VMA
+    const vma_dep = b.dependency("vma", .{
+        .target = target,
+        .optimize = optimize,
+    });
+    exe.addIncludePath(vma_dep.path("include"));
+    exe.addCSourceFiles(.{
+        .root = b.path("deps/interfaces/"),
+        .files = &.{"vk_mem_alloc.cpp"},
+    });
+
     // libc
     exe.linkLibC();
     exe.linkLibCpp();

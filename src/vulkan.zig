@@ -3,6 +3,7 @@ const std = @import("std");
 const c = @import("c.zig");
 
 pub const util = @import("vulkan/util.zig");
+pub const allocator = @import("vulkan/allocator.zig");
 pub const instance = @import("vulkan/instance.zig");
 pub const surface = @import("vulkan/surface.zig");
 pub const physicalDevice = @import("vulkan/physicalDevice.zig");
@@ -36,6 +37,7 @@ pub fn init(alloc: std.mem.Allocator) !void {
     try physicalDevice.init(arena);
     try queueFamily.init(arena);
     try device.init(arena);
+    try allocator.init();
     try queue.init();
     try swapChain.init(arena);
     try imageView.init(arena);
@@ -60,6 +62,7 @@ pub fn deinit() void {
     renderPass.deinit();
     imageView.deinit();
     swapChain.deinit();
+    allocator.deinit();
     device.deinit();
     surface.deinit();
     instance.deinit();

@@ -3,6 +3,7 @@ const std = @import("std");
 const c = @import("../c.zig");
 
 const util = @import("util.zig");
+const allocator = @import("allocator.zig");
 const device = @import("device.zig");
 const physicalDevice = @import("physicalDevice.zig");
 const queue = @import("queue.zig");
@@ -13,9 +14,10 @@ const swapChain = @import("swapChain.zig");
 const commandBuffer = @import("commandBuffer.zig");
 
 pub var vertexBuffer: c.VkBuffer = undefined;
-pub var vertexBufferMemory: c.VkDeviceMemory = undefined;
+pub var vertexBufferAlloc: c.VmaAllocation = undefined;
+
 pub var indexBuffer: c.VkBuffer = undefined;
-pub var indexBufferMemory: c.VkDeviceMemory = undefined;
+pub var indexBufferAlloc: c.VmaAllocation = undefined;
 
 pub const Vertex = struct {
     pos: [2]f32,
@@ -50,20 +52,7 @@ pub const Vertex = struct {
 pub var vertices: []Vertex = undefined;
 pub var indices: []u16 = undefined;
 
-fn findMemoryType(typeFilter: u32, properties: c.VkMemoryPropertyFlags) !u32 {
-    var memProperties: c.VkPhysicalDeviceMemoryProperties = undefined;
-    c.vkGetPhysicalDeviceMemoryProperties(physicalDevice.physicalDevice, &memProperties);
-
-    for (0..memProperties.memoryTypeCount) |i| {
-        if ((typeFilter & (@as(u32, 1) << @intCast(i))) != 0 and (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
-            return @intCast(i);
-        }
-    }
-
-    try std.debug.panic("", .{});
-}
-
-fn createBuffer(size: c.VkDeviceSize, usage: c.VkBufferUsageFlags, properties: c.VkMemoryPropertyFlags, buffer: *c.VkBuffer, bufferMemory: *c.VkDeviceMemory) !void {
+fn createBuffer(size: c.VkDeviceSize, usage: c.VkBufferUsageFlags, flags: c.VmaAllocationCreateFlags, buffer: *c.VkBuffer, bufferAlloc: *c.VmaAllocation, bufferAllocInfo: ?*c.VmaAllocationInfo) !void {
     const bufferInfo = c.VkBufferCreateInfo{
         .sType = c.VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
         .size = size,
@@ -71,20 +60,12 @@ fn createBuffer(size: c.VkDeviceSize, usage: c.VkBufferUsageFlags, properties: c
         .sharingMode = c.VK_SHARING_MODE_EXCLUSIVE,
     };
 
-    try util.check_vk(c.vkCreateBuffer(device.device, &bufferInfo, null, buffer));
-
-    var memRequirements: c.VkMemoryRequirements = undefined;
-    c.vkGetBufferMemoryRequirements(device.device, buffer.*, &memRequirements);
-
-    const allocInfo = c.VkMemoryAllocateInfo{
-        .sType = c.VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-        .allocationSize = memRequirements.size,
-        .memoryTypeIndex = try findMemoryType(memRequirements.memoryTypeBits, properties),
+    const allocCreateInfo = c.VmaAllocationCreateInfo{
+        .usage = c.VMA_MEMORY_USAGE_AUTO,
+        .flags = flags,
     };
 
-    try util.check_vk(c.vkAllocateMemory(device.device, &allocInfo, null, bufferMemory));
-
-    try util.check_vk(c.vkBindBufferMemory(device.device, buffer.*, bufferMemory.*, 0));
+    try util.check_vk(c.vmaCreateBuffer(allocator.allocator, &bufferInfo, &allocCreateInfo, buffer, bufferAlloc, bufferAllocInfo));
 }
 
 fn copyBuffer(srcBuffer: c.VkBuffer, dstBuffer: c.VkBuffer, size: c.VkDeviceSize) !void {
@@ -127,43 +108,39 @@ fn copyBuffer(srcBuffer: c.VkBuffer, dstBuffer: c.VkBuffer, size: c.VkDeviceSize
 }
 
 fn createVertexBuffer() !void {
-    const bufferSize: c.VkDeviceSize = @sizeOf(@TypeOf(vertices[0])) * vertices.len;
+    const bufferSize: c.VkDeviceSize = @sizeOf(Vertex) * vertices.len;
 
-    var stagingBuffer: c.VkBuffer = undefined;
-    var stagingBufferMemory: c.VkDeviceMemory = undefined;
-    try createBuffer(bufferSize, c.VK_BUFFER_USAGE_TRANSFER_SRC_BIT, c.VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | c.VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &stagingBuffer, &stagingBufferMemory);
+    var stagingBuffer: c.VkBuffer = null;
+    var stagingBufferAlloc: c.VmaAllocation = null;
+    var stagingBufferAllocInfo = c.VmaAllocationInfo{};
 
-    var data: ?*anyopaque = null;
-    try util.check_vk(c.vkMapMemory(device.device, stagingBufferMemory, 0, bufferSize, 0, @ptrCast(&data)));
-    @memcpy(@as([*]Vertex, @ptrCast(@alignCast(data))), vertices);
-    c.vkUnmapMemory(device.device, stagingBufferMemory);
+    try createBuffer(bufferSize, c.VK_BUFFER_USAGE_TRANSFER_SRC_BIT, c.VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | c.VMA_ALLOCATION_CREATE_MAPPED_BIT, &stagingBuffer, &stagingBufferAlloc, &stagingBufferAllocInfo);
 
-    try createBuffer(bufferSize, c.VK_BUFFER_USAGE_TRANSFER_DST_BIT | c.VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, c.VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &vertexBuffer, &vertexBufferMemory);
+    @memcpy(@as([*]Vertex, @ptrCast(@alignCast(stagingBufferAllocInfo.pMappedData))), vertices);
+
+    try createBuffer(bufferSize, c.VK_BUFFER_USAGE_TRANSFER_DST_BIT | c.VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, 0, &vertexBuffer, &vertexBufferAlloc, null);
 
     try copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
 
-    c.vkDestroyBuffer(device.device, stagingBuffer, null);
-    c.vkFreeMemory(device.device, stagingBufferMemory, null);
+    c.vmaDestroyBuffer(allocator.allocator, stagingBuffer, stagingBufferAlloc);
 }
 
 fn createIndexBuffer() !void {
-    const bufferSize: c.VkDeviceSize = @sizeOf(@TypeOf(indices[0])) * indices.len;
+    const bufferSize: c.VkDeviceSize = @sizeOf(Vertex) * vertices.len;
 
-    var stagingBuffer: c.VkBuffer = undefined;
-    var stagingBufferMemory: c.VkDeviceMemory = undefined;
-    try createBuffer(bufferSize, c.VK_BUFFER_USAGE_TRANSFER_SRC_BIT, c.VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | c.VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &stagingBuffer, &stagingBufferMemory);
+    var stagingBuffer: c.VkBuffer = null;
+    var stagingBufferAlloc: c.VmaAllocation = null;
+    var stagingBufferAllocInfo = c.VmaAllocationInfo{};
 
-    var data: ?*anyopaque = null;
-    try util.check_vk(c.vkMapMemory(device.device, stagingBufferMemory, 0, bufferSize, 0, @ptrCast(&data)));
-    @memcpy(@as([*]u16, @ptrCast(@alignCast(data))), indices);
-    c.vkUnmapMemory(device.device, stagingBufferMemory);
+    try createBuffer(bufferSize, c.VK_BUFFER_USAGE_TRANSFER_SRC_BIT, c.VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | c.VMA_ALLOCATION_CREATE_MAPPED_BIT, &stagingBuffer, &stagingBufferAlloc, &stagingBufferAllocInfo);
 
-    try createBuffer(bufferSize, c.VK_BUFFER_USAGE_TRANSFER_DST_BIT | c.VK_BUFFER_USAGE_INDEX_BUFFER_BIT, c.VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &indexBuffer, &indexBufferMemory);
+    @memcpy(@as([*]u16, @ptrCast(@alignCast(stagingBufferAllocInfo.pMappedData))), indices);
+
+    try createBuffer(bufferSize, c.VK_BUFFER_USAGE_TRANSFER_DST_BIT | c.VK_BUFFER_USAGE_INDEX_BUFFER_BIT, 0, &indexBuffer, &indexBufferAlloc, null);
 
     try copyBuffer(stagingBuffer, indexBuffer, bufferSize);
 
-    c.vkDestroyBuffer(device.device, stagingBuffer, null);
-    c.vkFreeMemory(device.device, stagingBufferMemory, null);
+    c.vmaDestroyBuffer(allocator.allocator, stagingBuffer, stagingBufferAlloc);
 }
 
 pub fn init(_: std.mem.Allocator) !void {
@@ -183,9 +160,6 @@ pub fn init(_: std.mem.Allocator) !void {
 }
 
 pub fn deinit() void {
-    c.vkDestroyBuffer(device.device, indexBuffer, null);
-    c.vkFreeMemory(device.device, indexBufferMemory, null);
-
-    c.vkDestroyBuffer(device.device, vertexBuffer, null);
-    c.vkFreeMemory(device.device, vertexBufferMemory, null);
+    c.vmaDestroyBuffer(allocator.allocator, vertexBuffer, vertexBufferAlloc);
+    c.vmaDestroyBuffer(allocator.allocator, indexBuffer, indexBufferAlloc);
 }
