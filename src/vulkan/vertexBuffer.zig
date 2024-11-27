@@ -94,7 +94,5 @@ pub fn init(alloc: std.mem.Allocator) !void {
 
 pub fn deinit() void {
     c.vkDestroyBuffer(device.device, vertexBuffer, null);
-
-    c.vkDestroyBuffer(device.device, vertexBuffer, null);
     c.vkFreeMemory(device.device, vertexBufferMemory, null);
 }
