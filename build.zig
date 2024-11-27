@@ -1,7 +1,20 @@
 const std = @import("std");
 const protobuf = @import("protobuf");
 
-pub fn build(b: *std.Build) void {
+const shader_files: []const []const u8 = &.{
+    "./shaders/test.frag",
+    "./shaders/test.vert",
+};
+
+pub fn build(b: *std.Build) !void {
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    defer {
+        const check = gpa.deinit();
+        if (check == .leak) @panic("Leaks deteced!");
+    }
+
+    const alloc = gpa.allocator();
+
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
@@ -38,9 +51,7 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
     exe.addIncludePath(cimgui_dep.path(""));
-    exe.addIncludePath(cimgui_dep.path("generator/output"));
     exe.addIncludePath(cimgui_dep.path("imgui"));
-    exe.addIncludePath(cimgui_dep.path("imgui/backends"));
     exe.addIncludePath(b.path("deps/interfaces/"));
 
     exe.addCSourceFiles(.{
@@ -70,6 +81,25 @@ pub fn build(b: *std.Build) void {
 
     b.installArtifact(exe);
 
+    var gen_shader = try alloc.alloc(*std.Build.Step.Run, shader_files.len);
+    defer alloc.free(gen_shader);
+
+    for (shader_files, 0..) |file, i| {
+        gen_shader[i] = b.addSystemCommand(&.{"naga"});
+        gen_shader[i].addArgs(&.{
+            b.fmt("{s}.wgsl", .{file}),
+            b.fmt("{s}.spv", .{file}),
+            "--keep-coordinate-space",
+        });
+    }
+
+    const gen_step = b.step("gen", "Generates shaders and protobuf");
+
+    gen_step.dependOn(gen_proto);
+    for (gen_shader) |shader| {
+        gen_step.dependOn(&shader.step);
+    }
+
     const run_cmd = b.addRunArtifact(exe);
 
     if (b.args) |args| {
@@ -77,8 +107,7 @@ pub fn build(b: *std.Build) void {
     }
 
     const run_step = b.step("run", "Run the app");
-
-    run_step.dependOn(gen_proto);
+    run_step.dependOn(gen_step);
     run_step.dependOn(&run_cmd.step);
 
     const resources = b.addInstallDirectory(.{
