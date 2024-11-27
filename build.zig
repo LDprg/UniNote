@@ -2,8 +2,8 @@ const std = @import("std");
 const protobuf = @import("protobuf");
 
 const shader_files: []const []const u8 = &.{
-    "./shaders/test.frag",
-    "./shaders/test.vert",
+    "./shaders/fragment",
+    "./shaders/vertex",
 };
 
 pub fn build(b: *std.Build) !void {

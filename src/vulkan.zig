@@ -46,15 +46,15 @@ pub fn init(alloc: std.mem.Allocator) !void {
     try pipeline.init(arena);
     try frameBuffer.init(arena);
     try commandBuffer.init();
-    try vertexBuffer.init(arena);
     try syncObjects.init();
+    try vertexBuffer.init(arena);
 }
 
 pub fn deinit() void {
     _ = c.vkDeviceWaitIdle(device.device);
 
-    syncObjects.deinit();
     vertexBuffer.deinit();
+    syncObjects.deinit();
     commandBuffer.deinit();
     frameBuffer.deinit();
     pipeline.deinit();
@@ -85,15 +85,13 @@ pub fn recreateSwapChain() !void {
 pub fn clear() !void {
     try util.check_vk(c.vkWaitForFences(device.device, 1, &syncObjects.inFlightFences[currentFrame], c.VK_TRUE, c.UINT64_MAX));
 
-    {
-        const res = c.vkAcquireNextImageKHR(device.device, swapChain.swapChain, c.UINT64_MAX, syncObjects.imageAvailableSemaphores[currentFrame], null, &imageIndex);
+    const res = c.vkAcquireNextImageKHR(device.device, swapChain.swapChain, c.UINT64_MAX, syncObjects.imageAvailableSemaphores[currentFrame], null, &imageIndex);
 
-        if (res == c.VK_ERROR_OUT_OF_DATE_KHR) {
-            try recreateSwapChain();
-            return;
-        } else if (res != c.VK_SUBOPTIMAL_KHR) {
-            try util.check_vk(res);
-        }
+    if (res == c.VK_ERROR_OUT_OF_DATE_KHR) {
+        try recreateSwapChain();
+        return;
+    } else if (res != c.VK_SUBOPTIMAL_KHR) {
+        try util.check_vk(res);
     }
 
     try util.check_vk(c.vkResetFences(device.device, 1, &syncObjects.inFlightFences[currentFrame]));
@@ -161,13 +159,11 @@ pub fn draw() !void {
         .pResults = null,
     };
 
-    {
-        const res = c.vkQueuePresentKHR(queue.presentQueue, &presentInfo);
-        if (res == c.VK_ERROR_OUT_OF_DATE_KHR or res == c.VK_SUBOPTIMAL_KHR) {
-            try recreateSwapChain();
-        } else {
-            try util.check_vk(res);
-        }
+    const res = c.vkQueuePresentKHR(queue.presentQueue, &presentInfo);
+    if (res == c.VK_ERROR_OUT_OF_DATE_KHR or res == c.VK_SUBOPTIMAL_KHR) {
+        try recreateSwapChain();
+    } else {
+        try util.check_vk(res);
     }
 
     currentFrame = (currentFrame + 1) % util.maxFramesInFligth;

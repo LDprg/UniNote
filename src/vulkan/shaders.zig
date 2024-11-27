@@ -14,8 +14,8 @@ var fragShaderModule: c.VkShaderModule = undefined;
 pub fn init(alloc_root: std.mem.Allocator) !void {
     alloc = alloc_root;
 
-    const vertShaderCode = try loadShader("shaders/test.vert.spv");
-    const fragShaderCode = try loadShader("shaders/test.frag.spv");
+    const vertShaderCode = try loadShader("shaders/vertex.spv");
+    const fragShaderCode = try loadShader("shaders/fragment.spv");
 
     vertShaderModule = try createShaderModule(vertShaderCode);
     fragShaderModule = try createShaderModule(fragShaderCode);
