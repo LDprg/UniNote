@@ -160,7 +160,11 @@ pub fn update() void {
 }
 
 pub fn draw() !void {
-    c.igRender();
+    if (!vulkan.swapChainRebuild) {
+        c.igRender();
 
-    c.ImGui_ImplVulkan_RenderDrawData(c.igGetDrawData(), vulkan.commandBuffer.commandBuffers[vulkan.currentFrame], null);
+        c.ImGui_ImplVulkan_RenderDrawData(c.igGetDrawData(), vulkan.commandBuffer.commandBuffers[vulkan.currentFrame], null);
+    } else {
+        c.igEndFrame();
+    }
 }

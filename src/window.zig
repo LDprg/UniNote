@@ -48,8 +48,12 @@ pub fn getNativeWindow() ?*c.SDL_Window {
 pub fn getEvent() ?c.SDL_Event {
     var e: c.SDL_Event = undefined;
 
-    if (c.SDL_PollEvent(&e))
+    if (c.SDL_PollEvent(&e)) {
+        if (e.type == c.SDL_EVENT_WINDOW_RESIZED) {
+            vulkan.swapChainRebuild = true;
+        }
         return e;
+    }
 
     return null;
 }
@@ -72,9 +76,15 @@ pub fn getWindowTitle() [*]const u8 {
 }
 
 pub fn clear() !void {
-    try vulkan.clear();
+    if (!vulkan.swapChainRebuild) {
+        try vulkan.clear();
+    }
 }
 
 pub fn draw() !void {
-    try vulkan.draw();
+    if (!vulkan.swapChainRebuild) {
+        try vulkan.draw();
+    } else {
+        try vulkan.rebuildSwapChain();
+    }
 }

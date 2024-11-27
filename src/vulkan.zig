@@ -2,6 +2,8 @@ const std = @import("std");
 
 const c = @import("c.zig");
 
+const imgui = @import("imgui.zig");
+
 pub const util = @import("vulkan/util.zig");
 pub const allocator = @import("vulkan/allocator.zig");
 pub const instance = @import("vulkan/instance.zig");
@@ -22,6 +24,8 @@ pub const vertexBuffer = @import("vulkan/vertexBuffer.zig");
 
 pub var imageIndex: u32 = undefined;
 pub var currentFrame: u32 = 0;
+
+pub var swapChainRebuild = false;
 
 var arena_state: std.heap.ArenaAllocator = undefined;
 var arena: std.mem.Allocator = undefined;
@@ -70,7 +74,7 @@ pub fn deinit() void {
     arena_state.deinit();
 }
 
-pub fn recreateSwapChain() !void {
+pub fn rebuildSwapChain() !void {
     try util.check_vk(c.vkDeviceWaitIdle(device.device));
 
     frameBuffer.deinit();
@@ -80,6 +84,8 @@ pub fn recreateSwapChain() !void {
     try swapChain.init(arena);
     try imageView.init(arena);
     try frameBuffer.init(arena);
+
+    swapChainRebuild = false;
 }
 
 pub fn clear() !void {
@@ -88,7 +94,7 @@ pub fn clear() !void {
     const res = c.vkAcquireNextImageKHR(device.device, swapChain.swapChain, c.UINT64_MAX, syncObjects.imageAvailableSemaphores[currentFrame], null, &imageIndex);
 
     if (res == c.VK_ERROR_OUT_OF_DATE_KHR) {
-        try recreateSwapChain();
+        swapChainRebuild = true;
         return;
     } else if (res != c.VK_SUBOPTIMAL_KHR) {
         try util.check_vk(res);
@@ -122,7 +128,6 @@ pub fn clear() !void {
     };
     c.vkCmdSetScissor(commandBuffer.commandBuffers[currentFrame], 0, 1, &scissor);
 
-    // c.vkCmdDraw(commandBuffer.commandBuffers[currentFrame], @intCast(vertexBuffer.vertices.len), 1, 0, 0);
     c.vkCmdDrawIndexed(commandBuffer.commandBuffers[currentFrame], @intCast(vertexBuffer.indices.len), 1, 0, 0, 0);
 }
 
@@ -161,7 +166,7 @@ pub fn draw() !void {
 
     const res = c.vkQueuePresentKHR(queue.presentQueue, &presentInfo);
     if (res == c.VK_ERROR_OUT_OF_DATE_KHR or res == c.VK_SUBOPTIMAL_KHR) {
-        try recreateSwapChain();
+        swapChainRebuild = true;
     } else {
         try util.check_vk(res);
     }
