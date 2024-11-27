@@ -110,6 +110,9 @@ pub fn build(b: *std.Build) !void {
     run_step.dependOn(gen_step);
     run_step.dependOn(&run_cmd.step);
 
+    const run_only_step = b.step("run-only", "Only run the app");
+    run_only_step.dependOn(&run_cmd.step);
+
     const resources = b.addInstallDirectory(.{
         .include_extensions = &.{".ttf"},
         .source_dir = b.path("res"),

@@ -58,38 +58,47 @@ fn findMemoryType(typeFilter: u32, properties: c.VkMemoryPropertyFlags) !u32 {
     try std.debug.panic("", .{});
 }
 
+fn createBuffer(size: c.VkDeviceSize, usage: c.VkBufferUsageFlags, properties: c.VkMemoryPropertyFlags, buffer: *c.VkBuffer, bufferMemory: *c.VkDeviceMemory) !void {
+    const bufferInfo = c.VkBufferCreateInfo{
+        .sType = c.VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+        .size = size,
+        .usage = usage,
+        .sharingMode = c.VK_SHARING_MODE_EXCLUSIVE,
+    };
+
+    try util.check_vk(c.vkCreateBuffer(device.device, &bufferInfo, null, buffer));
+
+    var memRequirements: c.VkMemoryRequirements = undefined;
+    c.vkGetBufferMemoryRequirements(device.device, buffer.*, &memRequirements);
+
+    const allocInfo = c.VkMemoryAllocateInfo{
+        .sType = c.VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+        .allocationSize = memRequirements.size,
+        .memoryTypeIndex = try findMemoryType(memRequirements.memoryTypeBits, properties),
+    };
+
+    try util.check_vk(c.vkAllocateMemory(device.device, &allocInfo, null, bufferMemory));
+
+    try util.check_vk(c.vkBindBufferMemory(device.device, buffer.*, bufferMemory.*, 0));
+}
+
+fn createVertexBuffer() !void {
+    const bufferSize: c.VkDeviceSize = @sizeOf(@TypeOf(vertices[0])) * vertices.len;
+    try createBuffer(bufferSize, c.VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, c.VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | c.VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &vertexBuffer, &vertexBufferMemory);
+
+    var data: ?*anyopaque = null;
+    try util.check_vk(c.vkMapMemory(device.device, vertexBufferMemory, 0, bufferSize, 0, @ptrCast(&data)));
+    @memcpy(@as([*]Vertex, @ptrCast(@alignCast(data))), vertices);
+    c.vkUnmapMemory(device.device, vertexBufferMemory);
+}
+
 pub fn init(alloc: std.mem.Allocator) !void {
     vertices = try alloc.alloc(Vertex, 3);
     vertices[0] = Vertex{ .pos = [2]f32{ 0, -0.5 }, .color = [4]f32{ 1, 0, 0, 1 } };
     vertices[1] = Vertex{ .pos = [2]f32{ 0.5, 0.5 }, .color = [4]f32{ 0, 1, 0, 1 } };
     vertices[2] = Vertex{ .pos = [2]f32{ -0.5, 0.5 }, .color = [4]f32{ 0, 0, 1, 1 } };
 
-    const bufferInfo = c.VkBufferCreateInfo{
-        .sType = c.VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-        .size = @sizeOf(Vertex) * vertices.len,
-        .usage = c.VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-        .sharingMode = c.VK_SHARING_MODE_EXCLUSIVE,
-    };
-
-    try util.check_vk(c.vkCreateBuffer(device.device, &bufferInfo, null, &vertexBuffer));
-
-    var memRequirements: c.VkMemoryRequirements = undefined;
-    c.vkGetBufferMemoryRequirements(device.device, vertexBuffer, &memRequirements);
-
-    const allocInfo = c.VkMemoryAllocateInfo{
-        .sType = c.VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-        .allocationSize = memRequirements.size,
-        .memoryTypeIndex = try findMemoryType(memRequirements.memoryTypeBits, c.VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | c.VK_MEMORY_PROPERTY_HOST_COHERENT_BIT),
-    };
-
-    try util.check_vk(c.vkAllocateMemory(device.device, &allocInfo, null, &vertexBufferMemory));
-
-    try util.check_vk(c.vkBindBufferMemory(device.device, vertexBuffer, vertexBufferMemory, 0));
-
-    var data: ?*anyopaque = null;
-    try util.check_vk(c.vkMapMemory(device.device, vertexBufferMemory, 0, bufferInfo.size, 0, @ptrCast(&data)));
-    @memcpy(@as([*]Vertex, @ptrCast(@alignCast(data))), vertices);
-    c.vkUnmapMemory(device.device, vertexBufferMemory);
+    try createVertexBuffer();
 }
 
 pub fn deinit() void {
