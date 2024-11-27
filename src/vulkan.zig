@@ -43,8 +43,8 @@ pub fn init(alloc: std.mem.Allocator) !void {
     try shaders.init(arena);
     try pipeline.init(arena);
     try frameBuffer.init(arena);
-    try vertexBuffer.init(arena);
     try commandBuffer.init();
+    try vertexBuffer.init(arena);
     try syncObjects.init();
 }
 
@@ -52,8 +52,8 @@ pub fn deinit() void {
     _ = c.vkDeviceWaitIdle(device.device);
 
     syncObjects.deinit();
-    commandBuffer.deinit();
     vertexBuffer.deinit();
+    commandBuffer.deinit();
     frameBuffer.deinit();
     pipeline.deinit();
     shaders.deinit();
@@ -103,6 +103,7 @@ pub fn clear() !void {
     const vertexBuffers: [*]const c.VkBuffer = &.{vertexBuffer.vertexBuffer};
     const offsets: [*]const c.VkDeviceSize = &.{0};
     c.vkCmdBindVertexBuffers(commandBuffer.commandBuffers[currentFrame], 0, 1, vertexBuffers, offsets);
+    c.vkCmdBindIndexBuffer(commandBuffer.commandBuffers[currentFrame], vertexBuffer.indexBuffer, 0, c.VK_INDEX_TYPE_UINT16);
 
     const viewport = c.VkViewport{
         .x = 0.0,
@@ -120,7 +121,8 @@ pub fn clear() !void {
     };
     c.vkCmdSetScissor(commandBuffer.commandBuffers[currentFrame], 0, 1, &scissor);
 
-    c.vkCmdDraw(commandBuffer.commandBuffers[currentFrame], @intCast(vertexBuffer.vertices.len), 1, 0, 0);
+    // c.vkCmdDraw(commandBuffer.commandBuffers[currentFrame], @intCast(vertexBuffer.vertices.len), 1, 0, 0);
+    c.vkCmdDrawIndexed(commandBuffer.commandBuffers[currentFrame], @intCast(vertexBuffer.indices.len), 1, 0, 0, 0);
 }
 
 pub fn draw() !void {
