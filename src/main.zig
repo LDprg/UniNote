@@ -41,6 +41,27 @@ pub fn main() !void {
                 event.event.mouseMotion, event.event.penMotion => {
                     x = e.motion.x;
                     y = e.motion.y;
+
+                    const size = window.getSize();
+                    vulkan.vertexBuffer.vertices[0].pos[0] = (2 * x / @as(f32, @floatFromInt(size.x))) - 1;
+                    vulkan.vertexBuffer.vertices[0].pos[1] = (2 * y / @as(f32, @floatFromInt(size.y))) - 1;
+
+                    vulkan.vertexBuffer.vertices[1].pos[0] = (2 * x / @as(f32, @floatFromInt(size.x))) - 0.5;
+                    vulkan.vertexBuffer.vertices[1].pos[1] = (2 * y / @as(f32, @floatFromInt(size.y))) - 0;
+
+                    vulkan.vertexBuffer.vertices[2].pos[0] = (2 * x / @as(f32, @floatFromInt(size.x))) - 1.5;
+                    vulkan.vertexBuffer.vertices[2].pos[1] = (2 * y / @as(f32, @floatFromInt(size.y))) - 0;
+
+                    const bufferInfo = c.VkBufferCreateInfo{
+                        .sType = c.VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+                        .size = @sizeOf(vulkan.vertexBuffer.Vertex) * vulkan.vertexBuffer.vertices.len,
+                        .usage = c.VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                        .sharingMode = c.VK_SHARING_MODE_EXCLUSIVE,
+                    };
+                    var data: ?*anyopaque = null;
+                    try vulkan.util.check_vk(c.vkMapMemory(vulkan.device.device, vulkan.vertexBuffer.vertexBufferMemory, 0, bufferInfo.size, 0, @ptrCast(&data)));
+                    @memcpy(@as([*]vulkan.vertexBuffer.Vertex, @ptrCast(@alignCast(data))), vulkan.vertexBuffer.vertices);
+                    c.vkUnmapMemory(vulkan.device.device, vulkan.vertexBuffer.vertexBufferMemory);
                 },
                 else => {},
             }
