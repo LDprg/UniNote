@@ -7,6 +7,7 @@ const device = @import("device.zig");
 const swapChain = @import("swapChain.zig");
 const renderPass = @import("renderPass.zig");
 const shaders = @import("shaders.zig");
+const vertexBuffer = @import("vertexBuffer.zig");
 
 const dynamicStates: []const c.VkDynamicState = &.{
     c.VK_DYNAMIC_STATE_VIEWPORT,
@@ -16,13 +17,16 @@ const dynamicStates: []const c.VkDynamicState = &.{
 pub var pipelineLayout: c.VkPipelineLayout = null;
 pub var graphicsPipeline: c.VkPipeline = null;
 
-pub fn init() !void {
+pub fn init(alloc: std.mem.Allocator) !void {
+    const bindingDescription = vertexBuffer.Vertex.getBindingDescription();
+    const attributeDescriptions = try vertexBuffer.Vertex.getAttributeDescriptions(alloc);
+
     const vertexInputInfo = c.VkPipelineVertexInputStateCreateInfo{
         .sType = c.VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
-        .vertexBindingDescriptionCount = 0,
-        .pVertexBindingDescriptions = null,
-        .vertexAttributeDescriptionCount = 0,
-        .pVertexAttributeDescriptions = null,
+        .vertexBindingDescriptionCount = 1,
+        .vertexAttributeDescriptionCount = @intCast(attributeDescriptions.len),
+        .pVertexBindingDescriptions = &bindingDescription,
+        .pVertexAttributeDescriptions = attributeDescriptions.ptr,
     };
 
     const inputAssembly = c.VkPipelineInputAssemblyStateCreateInfo{

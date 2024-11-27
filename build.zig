@@ -60,6 +60,8 @@ pub fn build(b: *std.Build) void {
 
     // SDL3
     exe.linkSystemLibrary("SDL3");
+
+    // Vulkan
     exe.linkSystemLibrary("vulkan");
 
     // libc

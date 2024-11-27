@@ -17,6 +17,7 @@ pub const commandBuffer = @import("vulkan/commandBuffer.zig");
 pub const syncObjects = @import("vulkan/syncObjects.zig");
 pub const shaders = @import("vulkan/shaders.zig");
 pub const pipeline = @import("vulkan/pipeline.zig");
+pub const vertexBuffer = @import("vulkan/vertexBuffer.zig");
 
 pub var imageIndex: u32 = undefined;
 pub var currentFrame: u32 = 0;
@@ -40,8 +41,9 @@ pub fn init(alloc: std.mem.Allocator) !void {
     try imageView.init(arena);
     try renderPass.init();
     try shaders.init(arena);
-    try pipeline.init();
+    try pipeline.init(arena);
     try frameBuffer.init(arena);
+    try vertexBuffer.init(arena);
     try commandBuffer.init();
     try syncObjects.init();
 }
@@ -51,6 +53,7 @@ pub fn deinit() void {
 
     syncObjects.deinit();
     commandBuffer.deinit();
+    vertexBuffer.deinit();
     frameBuffer.deinit();
     pipeline.deinit();
     shaders.deinit();
@@ -97,6 +100,10 @@ pub fn clear() !void {
 
     c.vkCmdBindPipeline(commandBuffer.commandBuffers[currentFrame], c.VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.graphicsPipeline);
 
+    const vertexBuffers: [*]const c.VkBuffer = &.{vertexBuffer.vertexBuffer};
+    const offsets: [*]const c.VkDeviceSize = &.{0};
+    c.vkCmdBindVertexBuffers(commandBuffer.commandBuffers[currentFrame], 0, 1, vertexBuffers, offsets);
+
     const viewport = c.VkViewport{
         .x = 0.0,
         .y = 0.0,
@@ -113,7 +120,7 @@ pub fn clear() !void {
     };
     c.vkCmdSetScissor(commandBuffer.commandBuffers[currentFrame], 0, 1, &scissor);
 
-    c.vkCmdDraw(commandBuffer.commandBuffers[currentFrame], 3, 1, 0, 0);
+    c.vkCmdDraw(commandBuffer.commandBuffers[currentFrame], @intCast(vertexBuffer.vertices.len), 1, 0, 0);
 }
 
 pub fn draw() !void {
