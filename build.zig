@@ -130,6 +130,16 @@ pub fn build(b: *std.Build) !void {
         .install_dir = .prefix,
         .install_subdir = "bin/res",
     });
-
     b.getInstallStep().dependOn(&resources.step);
+
+    const shaders = b.addInstallDirectory(.{
+        .include_extensions = &.{".spv"},
+        .source_dir = b.path("shaders"),
+        .install_dir = .prefix,
+        .install_subdir = "bin/shaders",
+    });
+    for (gen_shader) |shader| {
+        shaders.step.dependOn(&shader.step);
+    }
+    b.getInstallStep().dependOn(&shaders.step);
 }
