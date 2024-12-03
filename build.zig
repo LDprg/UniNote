@@ -10,7 +10,7 @@ pub fn build(b: *std.Build) !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer {
         const check = gpa.deinit();
-        if (check == .leak) @panic("Leaks deteced!");
+        if (check == .leak) std.debug.panic("Leaks deteced!", .{});
     }
 
     const alloc = gpa.allocator();

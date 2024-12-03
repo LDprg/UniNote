@@ -13,13 +13,16 @@ pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer {
         const check = gpa.deinit();
-        if (check == .leak) @panic("Leaks deteced!");
+        if (check == .leak) std.debug.panic("Leaks deteced!", .{});
     }
 
     const alloc = gpa.allocator();
 
-    try window.init(alloc, 1280, 960);
+    try window.init(1280, 960);
     defer window.deinit();
+
+    try vulkan.init(alloc);
+    defer vulkan.deinit();
 
     try imgui.init();
     defer imgui.deinit() catch std.debug.panic("Imgui deinit failed", .{});

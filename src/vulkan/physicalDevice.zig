@@ -19,9 +19,9 @@ pub fn init(alloc: std.mem.Allocator) !void {
 
     // Select gpu
     var useDevice: usize = 0;
-    for (devices, 0..) |gpu, i| {
+    for (0..deviceCount) |i| {
         var properties: c.VkPhysicalDeviceProperties = undefined;
-        c.vkGetPhysicalDeviceProperties(gpu, &properties);
+        c.vkGetPhysicalDeviceProperties(devices[i], &properties);
         if (properties.deviceType == c.VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
             useDevice = i;
             break;

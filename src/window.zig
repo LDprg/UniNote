@@ -9,7 +9,7 @@ var sdl_window: ?*c.SDL_Window = undefined;
 pub const size = struct { x: u32, y: u32 };
 pub const event = enum(u32) { quit = c.SDL_EVENT_QUIT };
 
-pub fn init(alloc: std.mem.Allocator, x: i32, y: i32) !void {
+pub fn init(x: i32, y: i32) !void {
     _ = c.SDL_SetHint(c.SDL_HINT_VIDEO_DRIVER, "wayland,x11");
 
     std.debug.print("Init SDL\n", .{});
@@ -29,13 +29,10 @@ pub fn init(alloc: std.mem.Allocator, x: i32, y: i32) !void {
         std.debug.print("Could not create window: {s}\n", .{c.SDL_GetError()});
         return;
     }
-
-    try vulkan.init(alloc);
 }
 
 pub fn deinit() void {
     std.debug.print("Deinit sdl\n", .{});
-    vulkan.deinit();
 
     c.SDL_DestroyWindow(sdl_window);
     c.SDL_Quit();

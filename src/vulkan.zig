@@ -63,6 +63,7 @@ pub fn init(alloc: std.mem.Allocator) !void {
 }
 
 pub fn deinit() void {
+    std.debug.print("Deinit Vulkan\n", .{});
     _ = c.vkDeviceWaitIdle(device.device);
 
     descriptorPool.deinit();
