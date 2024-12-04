@@ -18,22 +18,33 @@ var y: f32 = 0;
 var alloc: std.mem.Allocator = undefined;
 
 var test_shape: shape.ShapeIndexed = undefined;
+var test_shape2: shape.Shape = undefined;
 
 pub fn init(alloc_root: std.mem.Allocator) !void {
     alloc = alloc_root;
 
-    var vertex = [_]vulkan.vertex_buffer.Vertex{
+    var vertex_shape = [_]vulkan.vertex_buffer.Vertex{
         vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 200, 200 }, .color = [4]f32{ 1, 0, 0, 1 } },
         vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 700, 200 }, .color = [4]f32{ 0, 1, 0, 1 } },
         vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 700, 700 }, .color = [4]f32{ 0, 0, 1, 1 } },
         vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 200, 700 }, .color = [4]f32{ 1, 0, 1, 1 } },
     };
-    var index = [_]u16{ 0, 1, 2, 2, 3, 0 };
-    try test_shape.init(&vertex, &index);
+    var index_shape = [_]u16{ 0, 1, 2, 2, 3, 0 };
+    try test_shape.init(&vertex_shape, &index_shape);
+
+    var vertex_shape2 = [_]vulkan.vertex_buffer.Vertex{
+        vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 200, 200 }, .color = [4]f32{ 1, 1, 1, 1 } },
+        vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 700, 200 }, .color = [4]f32{ 1, 1, 1, 1 } },
+        vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 700, 700 }, .color = [4]f32{ 1, 1, 1, 1 } },
+        vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 200, 700 }, .color = [4]f32{ 1, 1, 1, 1 } },
+        vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 200, 200 }, .color = [4]f32{ 1, 1, 1, 1 } },
+    };
+    try test_shape2.init(&vertex_shape2);
 }
 
 pub fn deinit() void {
     test_shape.deinit();
+    test_shape2.deinit();
 }
 
 pub fn processEvent(e: *const c.SDL_Event) !void {
@@ -82,4 +93,5 @@ pub fn update() !void {
 
 pub fn draw() !void {
     test_shape.draw();
+    test_shape2.draw();
 }

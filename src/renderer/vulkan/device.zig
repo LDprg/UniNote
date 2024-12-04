@@ -11,7 +11,10 @@ var queue_priority: f32 = 1.0;
 
 pub var device: c.VkDevice = undefined;
 
-pub var extensions: []?[*]const u8 = undefined;
+pub var extensions: []const ?[*]const u8 = &.{
+    c.VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+    c.VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
+};
 
 var alloc: std.mem.Allocator = undefined;
 
@@ -20,10 +23,6 @@ pub fn init(alloc_root: std.mem.Allocator) !void {
 
     var queue_create_infos = std.ArrayList(c.VkDeviceQueueCreateInfo).init(alloc);
     defer queue_create_infos.deinit();
-
-    extensions = try alloc.alloc(?[*]const u8, 2);
-    extensions[0] = c.VK_KHR_SWAPCHAIN_EXTENSION_NAME;
-    extensions[1] = c.VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME;
 
     const unique_queue_families = [_]u32{
         queue_family.graphics_family.?,
