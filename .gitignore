@@ -1,4 +1,5 @@
 .vscode
+.ropeproject
 
 .zig-cache
 zig-out

@@ -10,17 +10,31 @@ const protobuf = @import("root").file.protobuf;
 
 const imgui = @import("root").renderer.imgui;
 const vulkan = @import("root").renderer.vulkan;
+const shape = @import("root").renderer.shape;
 
 var x: f32 = 0;
 var y: f32 = 0;
 
 var alloc: std.mem.Allocator = undefined;
 
+var test_shape: shape.ShapeIndexed = undefined;
+
 pub fn init(alloc_root: std.mem.Allocator) !void {
     alloc = alloc_root;
+
+    var vertex = [_]vulkan.vertex_buffer.Vertex{
+        vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 200, 200 }, .color = [4]f32{ 1, 0, 0, 1 } },
+        vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 700, 200 }, .color = [4]f32{ 0, 1, 0, 1 } },
+        vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 700, 700 }, .color = [4]f32{ 0, 0, 1, 1 } },
+        vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 200, 700 }, .color = [4]f32{ 1, 0, 1, 1 } },
+    };
+    var index = [_]u16{ 0, 1, 2, 2, 3, 0 };
+    try test_shape.init(&vertex, &index);
 }
 
-pub fn deinit() void {}
+pub fn deinit() void {
+    test_shape.deinit();
+}
 
 pub fn processEvent(e: *const c.SDL_Event) !void {
     switch (@as(event.Event, @enumFromInt(e.type))) {
@@ -66,4 +80,6 @@ pub fn update() !void {
     c.igShowDemoWindow(null);
 }
 
-pub fn draw() !void {}
+pub fn draw() !void {
+    test_shape.draw();
+}

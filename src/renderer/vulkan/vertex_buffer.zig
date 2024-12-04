@@ -49,20 +49,7 @@ pub const Buffer = struct {
     buffer_alloc_info: ?c.VmaAllocationInfo,
 };
 
-pub var vertex_buffer: Buffer = undefined;
-pub var index_buffer: Buffer = undefined;
-
-pub fn init(vertices: []Vertex, indices: []u16) !void {
-    try createBufferStaging(&vertex_buffer, Vertex, vertices, c.VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-    try createBufferStaging(&index_buffer, u16, indices, c.VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
-}
-
-pub fn deinit() void {
-    c.vmaDestroyBuffer(allocator.allocator, vertex_buffer.buffer, vertex_buffer.buffer_alloc);
-    c.vmaDestroyBuffer(allocator.allocator, index_buffer.buffer, index_buffer.buffer_alloc);
-}
-
-fn createBufferStaging(buffer: *Buffer, comptime result_type: type, result: []result_type, flags: c.VmaAllocationCreateFlags) !void {
+pub fn createBufferStaging(buffer: *Buffer, comptime result_type: type, result: []result_type, flags: c.VmaAllocationCreateFlags) !void {
     const size: c.VkDeviceSize = @sizeOf(result_type) * result.len;
 
     var staging_buffer = Buffer{

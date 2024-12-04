@@ -1,0 +1,17 @@
+syntax = "proto3";
+package save_file;
+
+message SaveFile {
+  string name = 1;
+  int32 id = 2;
+  repeated Page page = 3 [ packed = true ];
+}
+
+message Page { repeated Shape shapes = 1 [ packed = true ]; }
+
+message Shape { repeated Vertex vertices = 1 [ packed = true ]; }
+
+message Vertex {
+  float32 x = 1;
+  float32 y = 2;
+}

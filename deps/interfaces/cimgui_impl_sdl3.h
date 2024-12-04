@@ -7,7 +7,9 @@ struct SDL_Window;
 struct SDL_Renderer;
 struct SDL_Gamepad;
 typedef union SDL_Event SDL_Event;
-typedef enum { ImGui_ImplSDL3_GamepadMode_AutoFirst, ImGui_ImplSDL3_GamepadMode_AutoAll, ImGui_ImplSDL3_GamepadMode_Manual }ImGui_ImplSDL3_GamepadMode;CIMGUI_API bool ImGui_ImplSDL3_InitForOpenGL(SDL_Window* window,void* sdl_gl_context);
+typedef enum { ImGui_ImplSDL3_GamepadMode_AutoFirst, ImGui_ImplSDL3_GamepadMode_AutoAll, ImGui_ImplSDL3_GamepadMode_Manual }ImGui_ImplSDL3_GamepadMode;
+
+CIMGUI_API bool ImGui_ImplSDL3_InitForOpenGL(SDL_Window* window,void* sdl_gl_context);
 CIMGUI_API bool ImGui_ImplSDL3_InitForVulkan(SDL_Window* window);
 CIMGUI_API bool ImGui_ImplSDL3_InitForD3D(SDL_Window* window);
 CIMGUI_API bool ImGui_ImplSDL3_InitForMetal(SDL_Window* window);

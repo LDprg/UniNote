@@ -66,6 +66,7 @@ struct ImGui_ImplVulkanH_Window
     ImGui_ImplVulkanH_Frame* Frames;
     ImGui_ImplVulkanH_FrameSemaphores* FrameSemaphores;
 };
+
 CIMGUI_API bool ImGui_ImplVulkan_Init(ImGui_ImplVulkan_InitInfo* info);
 CIMGUI_API void ImGui_ImplVulkan_Shutdown(void);
 CIMGUI_API void ImGui_ImplVulkan_NewFrame(void);

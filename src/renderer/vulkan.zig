@@ -61,22 +61,11 @@ pub fn init(alloc: std.mem.Allocator) !void {
     try uniform_buffers.init(arena);
     try descriptor_pool.init();
     try descriptor_sets.init(arena);
-
-    var vertex = [_]vertex_buffer.Vertex{
-        vertex_buffer.Vertex{ .pos = [2]f32{ 100, 100 }, .color = [4]f32{ 1, 0, 0, 1 } },
-        vertex_buffer.Vertex{ .pos = [2]f32{ 500, 100 }, .color = [4]f32{ 0, 1, 0, 1 } },
-        vertex_buffer.Vertex{ .pos = [2]f32{ 500, 500 }, .color = [4]f32{ 0, 0, 1, 1 } },
-        vertex_buffer.Vertex{ .pos = [2]f32{ 100, 500 }, .color = [4]f32{ 1, 0, 1, 1 } },
-    };
-    var index = [_]u16{ 0, 1, 2, 2, 3, 0 };
-    try vertex_buffer.init(&vertex, &index);
 }
 
 pub fn deinit() void {
     std.debug.print("Deinit Vulkan\n", .{});
     _ = c.vkDeviceWaitIdle(device.device);
-
-    vertex_buffer.deinit();
 
     descriptor_pool.deinit();
     uniform_buffers.deinit();
@@ -140,61 +129,6 @@ pub fn clear() !void {
         c.VK_PIPELINE_BIND_POINT_GRAPHICS,
         pipeline.graphics_pipeline,
     );
-
-    const vertex_buffers: [*]const c.VkBuffer = &.{vertex_buffer.vertex_buffer.buffer};
-    const offsets: [*]const c.VkDeviceSize = &.{0};
-    c.vkCmdBindVertexBuffers(
-        command_buffer.command_buffers[current_frame],
-        0,
-        1,
-        vertex_buffers,
-        offsets,
-    );
-    c.vkCmdBindIndexBuffer(
-        command_buffer.command_buffers[current_frame],
-        vertex_buffer.index_buffer.buffer,
-        0,
-        c.VK_INDEX_TYPE_UINT16,
-    );
-
-    const viewport = c.VkViewport{
-        .x = 0.0,
-        .y = 0.0,
-        .width = @floatFromInt(swapchain.extent.width),
-        .height = @floatFromInt(swapchain.extent.height),
-        .minDepth = 0.0,
-        .maxDepth = 1.0,
-    };
-    c.vkCmdSetViewport(
-        command_buffer.command_buffers[current_frame],
-        0,
-        1,
-        &viewport,
-    );
-
-    const scissor = c.VkRect2D{
-        .offset = .{ .x = 0, .y = 0 },
-        .extent = swapchain.extent,
-    };
-    c.vkCmdSetScissor(
-        command_buffer.command_buffers[current_frame],
-        0,
-        1,
-        &scissor,
-    );
-
-    c.vkCmdBindDescriptorSets(
-        command_buffer.command_buffers[current_frame],
-        c.VK_PIPELINE_BIND_POINT_GRAPHICS,
-        pipeline.pipeline_layout,
-        0,
-        1,
-        &descriptor_sets.descriptor_sets[current_frame],
-        0,
-        null,
-    );
-
-    c.vkCmdDrawIndexed(command_buffer.command_buffers[current_frame], 6, 1, 0, 0, 0);
 }
 
 pub fn draw() !void {
