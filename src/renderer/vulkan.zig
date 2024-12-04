@@ -1,5 +1,7 @@
 const std = @import("std");
 
+const zmath = @import("zmath");
+
 const c = @import("root").c;
 
 const imgui = @import("root").renderer.imgui;
@@ -194,8 +196,14 @@ pub fn clear() !void {
 }
 
 pub fn draw() !void {
+    const w = 2 / @as(f32, @floatFromInt(swapchain.extent.width));
+    const h = 2 / @as(f32, @floatFromInt(swapchain.extent.height));
+
+    const view = zmath.mul(zmath.mul(zmath.identity(), zmath.scaling(w, h, 1)), zmath.translation(-1, -1, 0));
+
     var ubo = [_]uniform_buffers.UniformBufferObject{uniform_buffers.UniformBufferObject{
-        .scale = [2]f32{ @floatFromInt(swapchain.extent.width), @floatFromInt(swapchain.extent.height) },
+        .model = zmath.identity(),
+        .view = view,
     }};
 
     @memcpy(

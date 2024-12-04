@@ -69,6 +69,14 @@ pub fn build(b: *std.Build) !void {
         },
     });
 
+    // zmath
+    const zmath_dep = b.dependency("zmath", .{
+        .target = target,
+        .optimize = optimize,
+    });
+
+    exe.root_module.addImport("zmath", zmath_dep.module("root"));
+
     // SDL3
     exe.linkSystemLibrary("SDL3");
 

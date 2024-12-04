@@ -13,6 +13,10 @@
         .vma = .{
             .path = "./deps/VulkanMemoryAllocator",
         },
+        .zmath = .{
+            .url = "https://github.com/zig-gamedev/zmath/archive/master.tar.gz",
+            .hash = "1220081d55b58b968d953db1afc2fb01b2f5733929144e69522461ce25fa6450d84e",
+        },
     },
 
     .paths = .{

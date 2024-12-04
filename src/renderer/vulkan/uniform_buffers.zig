@@ -1,5 +1,7 @@
 const std = @import("std");
 
+const zmath = @import("zmath");
+
 const c = @import("root").c;
 
 const allocator = @import("root").renderer.vulkan.allocator;
@@ -7,7 +9,8 @@ const util = @import("root").renderer.vulkan.util;
 const vertex_buffer = @import("root").renderer.vulkan.vertex_buffer;
 
 pub const UniformBufferObject = struct {
-    scale: [2]f32,
+    model: zmath.Mat,
+    view: zmath.Mat,
 };
 
 pub var uniform_buffers: []c.VkBuffer = undefined;
