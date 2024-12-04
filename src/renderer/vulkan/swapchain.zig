@@ -1,8 +1,7 @@
 const std = @import("std");
 
-const c = @import("../c.zig");
-
-const window = @import("../window.zig");
+const c = @import("root").c;
+const window = @import("root").window;
 
 const device = @import("device.zig");
 const physical_device = @import("physical_device.zig");

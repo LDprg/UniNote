@@ -1,12 +1,11 @@
 const std = @import("std");
 
-const c = @import("c.zig");
-
-const event = @import("event.zig");
-const imgui = @import("imgui.zig");
-const protobuf = @import("protobuf.zig");
-const vulkan = @import("vulkan.zig");
-const window = @import("window.zig");
+pub const c = @import("c.zig");
+pub const event = @import("core/event.zig");
+pub const imgui = @import("renderer/imgui.zig");
+pub const protobuf = @import("file/protobuf.zig");
+pub const vulkan = @import("renderer/vulkan.zig");
+pub const window = @import("core/window.zig");
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};

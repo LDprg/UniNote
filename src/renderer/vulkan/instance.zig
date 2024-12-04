@@ -1,8 +1,7 @@
 const std = @import("std");
 
-const c = @import("../c.zig");
-
-const window = @import("../window.zig");
+const c = @import("root").c;
+const window = @import("root").window;
 
 const util = @import("util.zig");
 

@@ -1,6 +1,6 @@
 const std = @import("std");
 
-const c = @import("../c.zig");
+const c = @import("root").c;
 
 const device = @import("device.zig");
 const util = @import("util.zig");

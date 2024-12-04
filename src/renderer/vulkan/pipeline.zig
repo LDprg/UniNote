@@ -1,6 +1,6 @@
 const std = @import("std");
 
-const c = @import("../c.zig");
+const c = @import("root").c;
 
 const descriptor_set_layout = @import("descriptor_set_layout.zig");
 const device = @import("device.zig");

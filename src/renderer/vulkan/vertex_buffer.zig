@@ -1,6 +1,6 @@
 const std = @import("std");
 
-const c = @import("../c.zig");
+const c = @import("root").c;
 
 const allocator = @import("allocator.zig");
 const command_buffer = @import("command_buffer.zig");

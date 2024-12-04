@@ -1,6 +1,6 @@
 const std = @import("std");
 
-const c = @import("c.zig");
+const c = @import("root").c;
 
 pub const event = enum(u32) {
     quit = c.SDL_EVENT_QUIT,

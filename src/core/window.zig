@@ -1,8 +1,7 @@
 const std = @import("std");
 
-const vulkan = @import("vulkan.zig");
-
-const c = @import("c.zig");
+const c = @import("root").c;
+const vulkan = @import("root").vulkan;
 
 var window: ?*c.SDL_Window = undefined;
 

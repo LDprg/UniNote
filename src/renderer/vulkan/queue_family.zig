@@ -1,6 +1,6 @@
 const std = @import("std");
 
-const c = @import("../c.zig");
+const c = @import("root").c;
 
 const physical_device = @import("physical_device.zig");
 const surface = @import("surface.zig");

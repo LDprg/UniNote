@@ -1,10 +1,8 @@
 const std = @import("std");
 
-const vulkan = @import("vulkan.zig");
-
-const c = @import("c.zig");
-
-const window = @import("window.zig");
+const c = @import("root").c;
+const vulkan = @import("root").vulkan;
+const window = @import("root").window;
 
 var context: ?*c.ImGuiContext = undefined;
 
