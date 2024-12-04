@@ -2,13 +2,13 @@ const std = @import("std");
 
 const c = @import("../c.zig");
 
-const util = @import("util.zig");
 const device = @import("device.zig");
+const util = @import("util.zig");
 
-pub var descriptorSetLayout: c.VkDescriptorSetLayout = undefined;
+pub var descriptor_set_layout: c.VkDescriptorSetLayout = undefined;
 
 pub fn init() !void {
-    const uboLayoutBinding = c.VkDescriptorSetLayoutBinding{
+    const ubo_layout_binding = c.VkDescriptorSetLayoutBinding{
         .binding = 0,
         .descriptorType = c.VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
         .descriptorCount = 1,
@@ -16,15 +16,15 @@ pub fn init() !void {
         .pImmutableSamplers = null,
     };
 
-    const layoutInfo = c.VkDescriptorSetLayoutCreateInfo{
+    const layout_info = c.VkDescriptorSetLayoutCreateInfo{
         .sType = c.VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
         .bindingCount = 1,
-        .pBindings = &uboLayoutBinding,
+        .pBindings = &ubo_layout_binding,
     };
 
-    try util.check_vk(c.vkCreateDescriptorSetLayout(device.device, &layoutInfo, null, &descriptorSetLayout));
+    try util.check_vk(c.vkCreateDescriptorSetLayout(device.device, &layout_info, null, &descriptor_set_layout));
 }
 
 pub fn deinit() void {
-    c.vkDestroyDescriptorSetLayout(device.device, descriptorSetLayout, null);
+    c.vkDestroyDescriptorSetLayout(device.device, descriptor_set_layout, null);
 }

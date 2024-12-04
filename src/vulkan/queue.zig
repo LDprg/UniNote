@@ -2,14 +2,14 @@ const std = @import("std");
 
 const c = @import("../c.zig");
 
-const util = @import("util.zig");
-const queueFamily = @import("queueFamily.zig");
 const device = @import("device.zig");
+const queue_family = @import("queue_family.zig");
+const util = @import("util.zig");
 
-pub var graphicsQueue: c.VkQueue = undefined;
-pub var presentQueue: c.VkQueue = undefined;
+pub var graphics_queue: c.VkQueue = undefined;
+pub var present_queue: c.VkQueue = undefined;
 
 pub fn init() !void {
-    c.vkGetDeviceQueue(device.device, queueFamily.graphicsFamily.?, 0, &graphicsQueue);
-    c.vkGetDeviceQueue(device.device, queueFamily.presentFamily.?, 0, &presentQueue);
+    c.vkGetDeviceQueue(device.device, queue_family.graphics_family.?, 0, &graphics_queue);
+    c.vkGetDeviceQueue(device.device, queue_family.present_family.?, 0, &present_queue);
 }

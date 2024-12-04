@@ -2,22 +2,22 @@ const std = @import("std");
 
 const c = @import("../c.zig");
 
-const util = @import("util.zig");
-const physicalDevice = @import("physicalDevice.zig");
 const device = @import("device.zig");
 const instance = @import("instance.zig");
+const physical_device = @import("physical_device.zig");
+const util = @import("util.zig");
 
 pub var allocator: c.VmaAllocator = undefined;
 
 pub fn init() !void {
-    const allocatorInfo = c.VmaAllocatorCreateInfo{
-        .physicalDevice = physicalDevice.physicalDevice,
+    const allocator_info = c.VmaAllocatorCreateInfo{
+        .physicalDevice = physical_device.physical_device,
         .device = device.device,
         .instance = instance.instance,
         // .vulkanApiVersion = GetVulkanApiVersion(),
     };
 
-    try util.check_vk(c.vmaCreateAllocator(&allocatorInfo, &allocator));
+    try util.check_vk(c.vmaCreateAllocator(&allocator_info, &allocator));
 }
 
 pub fn deinit() void {

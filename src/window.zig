@@ -47,7 +47,7 @@ pub fn getEvent() ?c.SDL_Event {
 
     if (c.SDL_PollEvent(&e)) {
         if (e.type == c.SDL_EVENT_WINDOW_RESIZED) {
-            vulkan.swapChainRebuild = true;
+            vulkan.swapchain_rebuild = true;
         }
         return e;
     }
@@ -73,13 +73,13 @@ pub fn getWindowTitle() [*]const u8 {
 }
 
 pub fn clear() !void {
-    if (!vulkan.swapChainRebuild) {
+    if (!vulkan.swapchain_rebuild) {
         try vulkan.clear();
     }
 }
 
 pub fn draw() !void {
-    if (!vulkan.swapChainRebuild) {
+    if (!vulkan.swapchain_rebuild) {
         try vulkan.draw();
     } else {
         try vulkan.rebuildSwapChain();

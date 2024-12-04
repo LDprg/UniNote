@@ -2,12 +2,11 @@ const std = @import("std");
 
 const c = @import("c.zig");
 
-const window = @import("window.zig");
+const event = @import("event.zig");
 const imgui = @import("imgui.zig");
 const protobuf = @import("protobuf.zig");
-const event = @import("event.zig");
-
 const vulkan = @import("vulkan.zig");
+const window = @import("window.zig");
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
@@ -41,7 +40,7 @@ pub fn main() !void {
 
             switch (@as(event.event, @enumFromInt(e.type))) {
                 event.event.quit => break :loop,
-                event.event.mouseMotion, event.event.penMotion => {
+                event.event.mouse_motion, event.event.pen_motion => {
                     x = e.motion.x;
                     y = e.motion.y;
 
@@ -72,7 +71,7 @@ pub fn main() !void {
                 // std.debug.print("Size: {}\n", .{@as(i32, @intFromFloat(c.igGetFrameHeight()))});
 
                 if (c.igMenuItem_Bool("Save", "", false, true)) {
-                    std.debug.print("Save: {}\n", .{vulkan.swapChain.extent});
+                    std.debug.print("Save: {}\n", .{vulkan.swapchain.extent});
                 }
                 if (c.igMenuItem_Bool("Open", "", false, true)) {
                     std.debug.print("Open\n", .{});

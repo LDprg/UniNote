@@ -4,32 +4,32 @@ const c = @import("c.zig");
 
 const imgui = @import("imgui.zig");
 
-pub const util = @import("vulkan/util.zig");
 pub const allocator = @import("vulkan/allocator.zig");
-pub const instance = @import("vulkan/instance.zig");
-pub const surface = @import("vulkan/surface.zig");
-pub const physicalDevice = @import("vulkan/physicalDevice.zig");
-pub const queueFamily = @import("vulkan/queueFamily.zig");
+pub const command_buffer = @import("vulkan/command_buffer.zig");
+pub const descriptor_pool = @import("vulkan/descriptor_pool.zig");
+pub const descriptor_set_layout = @import("vulkan/descriptor_set_layout.zig");
+pub const descriptor_sets = @import("vulkan/descriptor_sets.zig");
 pub const device = @import("vulkan/device.zig");
-pub const queue = @import("vulkan/queue.zig");
-pub const swapChain = @import("vulkan/swapChain.zig");
-pub const imageView = @import("vulkan/imageView.zig");
-pub const renderPass = @import("vulkan/renderPass.zig");
-pub const frameBuffer = @import("vulkan/frameBuffer.zig");
-pub const commandBuffer = @import("vulkan/commandBuffer.zig");
-pub const syncObjects = @import("vulkan/syncObjects.zig");
-pub const shaders = @import("vulkan/shaders.zig");
+pub const frame_buffer = @import("vulkan/frame_buffer.zig");
+pub const image_view = @import("vulkan/image_view.zig");
+pub const instance = @import("vulkan/instance.zig");
+pub const physical_device = @import("vulkan/physical_device.zig");
 pub const pipeline = @import("vulkan/pipeline.zig");
-pub const vertexBuffer = @import("vulkan/vertexBuffer.zig");
-pub const descriptorSetLayout = @import("vulkan/descriptorSetLayout.zig");
-pub const uniformBuffers = @import("vulkan/uniformBuffers.zig");
-pub const descriptorPool = @import("vulkan/descriptorPool.zig");
-pub const descriptorSets = @import("vulkan/descriptorSets.zig");
+pub const queue = @import("vulkan/queue.zig");
+pub const queue_family = @import("vulkan/queue_family.zig");
+pub const render_pass = @import("vulkan/render_pass.zig");
+pub const shaders = @import("vulkan/shaders.zig");
+pub const surface = @import("vulkan/surface.zig");
+pub const swapchain = @import("vulkan/swapchain.zig");
+pub const sync_objects = @import("vulkan/sync_objects.zig");
+pub const uniform_buffers = @import("vulkan/uniform_buffers.zig");
+pub const util = @import("vulkan/util.zig");
+pub const vertex_buffer = @import("vulkan/vertex_buffer.zig");
 
-pub var imageIndex: u32 = undefined;
-pub var currentFrame: u32 = 0;
+pub var image_index: u32 = undefined;
+pub var current_frame: u32 = 0;
 
-pub var swapChainRebuild = false;
+pub var swapchain_rebuild = false;
 
 var arena_state: std.heap.ArenaAllocator = undefined;
 var arena: std.mem.Allocator = undefined;
@@ -42,42 +42,42 @@ pub fn init(alloc: std.mem.Allocator) !void {
 
     try instance.init();
     try surface.init();
-    try physicalDevice.init(arena);
-    try queueFamily.init(arena);
+    try physical_device.init(arena);
+    try queue_family.init(arena);
     try device.init(arena);
     try allocator.init();
     try queue.init();
-    try swapChain.init(arena);
-    try imageView.init(arena);
-    try renderPass.init();
+    try swapchain.init(arena);
+    try image_view.init(arena);
+    try render_pass.init();
     try shaders.init(arena);
-    try descriptorSetLayout.init();
+    try descriptor_set_layout.init();
     try pipeline.init(arena);
-    try frameBuffer.init(arena);
-    try commandBuffer.init();
-    try syncObjects.init();
-    try vertexBuffer.init();
-    try uniformBuffers.init(arena);
-    try descriptorPool.init();
-    try descriptorSets.init(arena);
+    try frame_buffer.init(arena);
+    try command_buffer.init();
+    try sync_objects.init();
+    try vertex_buffer.init();
+    try uniform_buffers.init(arena);
+    try descriptor_pool.init();
+    try descriptor_sets.init(arena);
 }
 
 pub fn deinit() void {
     std.debug.print("Deinit Vulkan\n", .{});
     _ = c.vkDeviceWaitIdle(device.device);
 
-    descriptorPool.deinit();
-    uniformBuffers.deinit();
-    vertexBuffer.deinit();
-    syncObjects.deinit();
-    commandBuffer.deinit();
-    frameBuffer.deinit();
+    descriptor_pool.deinit();
+    uniform_buffers.deinit();
+    vertex_buffer.deinit();
+    sync_objects.deinit();
+    command_buffer.deinit();
+    frame_buffer.deinit();
     pipeline.deinit();
-    descriptorSetLayout.deinit();
+    descriptor_set_layout.deinit();
     shaders.deinit();
-    renderPass.deinit();
-    imageView.deinit();
-    swapChain.deinit();
+    render_pass.deinit();
+    image_view.deinit();
+    swapchain.deinit();
     allocator.deinit();
     device.deinit();
     surface.deinit();
@@ -89,107 +89,107 @@ pub fn deinit() void {
 pub fn rebuildSwapChain() !void {
     try util.check_vk(c.vkDeviceWaitIdle(device.device));
 
-    frameBuffer.deinit();
-    imageView.deinit();
-    swapChain.deinit();
+    frame_buffer.deinit();
+    image_view.deinit();
+    swapchain.deinit();
 
-    try swapChain.init(arena);
-    try imageView.init(arena);
-    try frameBuffer.init(arena);
+    try swapchain.init(arena);
+    try image_view.init(arena);
+    try frame_buffer.init(arena);
 
-    swapChainRebuild = false;
+    swapchain_rebuild = false;
 }
 
 pub fn clear() !void {
-    try util.check_vk(c.vkWaitForFences(device.device, 1, &syncObjects.inFlightFences[currentFrame], c.VK_TRUE, c.UINT64_MAX));
+    try util.check_vk(c.vkWaitForFences(device.device, 1, &sync_objects.in_flight_fences[current_frame], c.VK_TRUE, c.UINT64_MAX));
 
-    const res = c.vkAcquireNextImageKHR(device.device, swapChain.swapChain, c.UINT64_MAX, syncObjects.imageAvailableSemaphores[currentFrame], null, &imageIndex);
+    const res = c.vkAcquireNextImageKHR(device.device, swapchain.swapchain, c.UINT64_MAX, sync_objects.image_available_semaphores[current_frame], null, &image_index);
 
     if (res == c.VK_ERROR_OUT_OF_DATE_KHR) {
-        swapChainRebuild = true;
+        swapchain_rebuild = true;
         return;
     } else if (res != c.VK_SUBOPTIMAL_KHR) {
         try util.check_vk(res);
     }
 
-    try util.check_vk(c.vkResetFences(device.device, 1, &syncObjects.inFlightFences[currentFrame]));
-    try util.check_vk(c.vkResetCommandBuffer(commandBuffer.commandBuffers[currentFrame], 0));
+    try util.check_vk(c.vkResetFences(device.device, 1, &sync_objects.in_flight_fences[current_frame]));
+    try util.check_vk(c.vkResetCommandBuffer(command_buffer.command_buffers[current_frame], 0));
 
-    try commandBuffer.beginCommandBuffer(commandBuffer.commandBuffers[currentFrame], imageIndex);
+    try command_buffer.beginCommandBuffer(command_buffer.command_buffers[current_frame], image_index);
 
-    c.vkCmdBindPipeline(commandBuffer.commandBuffers[currentFrame], c.VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.graphicsPipeline);
+    c.vkCmdBindPipeline(command_buffer.command_buffers[current_frame], c.VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.graphics_pipeline);
 
-    const vertexBuffers: [*]const c.VkBuffer = &.{vertexBuffer.vertexBuffer};
+    const vertex_buffers: [*]const c.VkBuffer = &.{vertex_buffer.vertex_buffer};
     const offsets: [*]const c.VkDeviceSize = &.{0};
-    c.vkCmdBindVertexBuffers(commandBuffer.commandBuffers[currentFrame], 0, 1, vertexBuffers, offsets);
-    c.vkCmdBindIndexBuffer(commandBuffer.commandBuffers[currentFrame], vertexBuffer.indexBuffer, 0, c.VK_INDEX_TYPE_UINT16);
+    c.vkCmdBindVertexBuffers(command_buffer.command_buffers[current_frame], 0, 1, vertex_buffers, offsets);
+    c.vkCmdBindIndexBuffer(command_buffer.command_buffers[current_frame], vertex_buffer.index_buffer, 0, c.VK_INDEX_TYPE_UINT16);
 
     const viewport = c.VkViewport{
         .x = 0.0,
         .y = 0.0,
-        .width = @floatFromInt(swapChain.extent.width),
-        .height = @floatFromInt(swapChain.extent.height),
+        .width = @floatFromInt(swapchain.extent.width),
+        .height = @floatFromInt(swapchain.extent.height),
         .minDepth = 0.0,
         .maxDepth = 1.0,
     };
-    c.vkCmdSetViewport(commandBuffer.commandBuffers[currentFrame], 0, 1, &viewport);
+    c.vkCmdSetViewport(command_buffer.command_buffers[current_frame], 0, 1, &viewport);
 
     const scissor = c.VkRect2D{
         .offset = .{ .x = 0, .y = 0 },
-        .extent = swapChain.extent,
+        .extent = swapchain.extent,
     };
-    c.vkCmdSetScissor(commandBuffer.commandBuffers[currentFrame], 0, 1, &scissor);
+    c.vkCmdSetScissor(command_buffer.command_buffers[current_frame], 0, 1, &scissor);
 
-    c.vkCmdBindDescriptorSets(commandBuffer.commandBuffers[currentFrame], c.VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipelineLayout, 0, 1, &descriptorSets.descriptorSets[currentFrame], 0, null);
+    c.vkCmdBindDescriptorSets(command_buffer.command_buffers[current_frame], c.VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipeline_layout, 0, 1, &descriptor_sets.descriptor_sets[current_frame], 0, null);
 
-    c.vkCmdDrawIndexed(commandBuffer.commandBuffers[currentFrame], @intCast(vertexBuffer.indices.len), 1, 0, 0, 0);
+    c.vkCmdDrawIndexed(command_buffer.command_buffers[current_frame], @intCast(vertex_buffer.indices.len), 1, 0, 0, 0);
 }
 
 pub fn draw() !void {
-    var ubo = [_]uniformBuffers.UniformBufferObject{uniformBuffers.UniformBufferObject{
-        .scale = [2]f32{ @floatFromInt(swapChain.extent.width), @floatFromInt(swapChain.extent.height) },
+    var ubo = [_]uniform_buffers.UniformBufferObject{uniform_buffers.UniformBufferObject{
+        .scale = [2]f32{ @floatFromInt(swapchain.extent.width), @floatFromInt(swapchain.extent.height) },
     }};
 
-    @memcpy(@as([*]uniformBuffers.UniformBufferObject, @ptrCast(@alignCast(uniformBuffers.uniformBuffersAllocInfo[currentFrame].pMappedData))), &ubo);
+    @memcpy(@as([*]uniform_buffers.UniformBufferObject, @ptrCast(@alignCast(uniform_buffers.uniform_buffers_alloc_info[current_frame].pMappedData))), &ubo);
 
-    try commandBuffer.endCommandBuffer(commandBuffer.commandBuffers[currentFrame]);
+    try command_buffer.endCommandBuffer(command_buffer.command_buffers[current_frame]);
 
-    const waitSemaphores: []const c.VkSemaphore = &.{syncObjects.imageAvailableSemaphores[currentFrame]};
-    const waitStages: []const c.VkPipelineStageFlags = &.{c.VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-    const signalSemaphores: []const c.VkSemaphore = &.{syncObjects.renderFinishedSemaphores[currentFrame]};
+    const wait_semaphores: []const c.VkSemaphore = &.{sync_objects.image_available_semaphores[current_frame]};
+    const wait_stages: []const c.VkPipelineStageFlags = &.{c.VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+    const signal_semaphores: []const c.VkSemaphore = &.{sync_objects.render_finished_semaphores[current_frame]};
 
-    var submitInfo = c.VkSubmitInfo{
+    var submit_info = c.VkSubmitInfo{
         .sType = c.VK_STRUCTURE_TYPE_SUBMIT_INFO,
-        .waitSemaphoreCount = @intCast(waitSemaphores.len),
-        .pWaitSemaphores = waitSemaphores.ptr,
-        .pWaitDstStageMask = waitStages.ptr,
+        .waitSemaphoreCount = @intCast(wait_semaphores.len),
+        .pWaitSemaphores = wait_semaphores.ptr,
+        .pWaitDstStageMask = wait_stages.ptr,
         .commandBufferCount = 1,
-        .pCommandBuffers = &commandBuffer.commandBuffers[currentFrame],
-        .signalSemaphoreCount = @intCast(signalSemaphores.len),
-        .pSignalSemaphores = signalSemaphores.ptr,
+        .pCommandBuffers = &command_buffer.command_buffers[current_frame],
+        .signalSemaphoreCount = @intCast(signal_semaphores.len),
+        .pSignalSemaphores = signal_semaphores.ptr,
     };
 
-    try util.check_vk(c.vkQueueSubmit(queue.graphicsQueue, 1, &submitInfo, syncObjects.inFlightFences[currentFrame]));
+    try util.check_vk(c.vkQueueSubmit(queue.graphics_queue, 1, &submit_info, sync_objects.in_flight_fences[current_frame]));
 
     // Present
-    const swapChains: []const c.VkSwapchainKHR = &.{swapChain.swapChain};
+    const swapchains: []const c.VkSwapchainKHR = &.{swapchain.swapchain};
 
-    const presentInfo = c.VkPresentInfoKHR{
+    const present_info = c.VkPresentInfoKHR{
         .sType = c.VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
-        .waitSemaphoreCount = @intCast(signalSemaphores.len),
-        .pWaitSemaphores = signalSemaphores.ptr,
-        .swapchainCount = @intCast(swapChains.len),
-        .pSwapchains = swapChains.ptr,
-        .pImageIndices = &imageIndex,
+        .waitSemaphoreCount = @intCast(signal_semaphores.len),
+        .pWaitSemaphores = signal_semaphores.ptr,
+        .swapchainCount = @intCast(swapchains.len),
+        .pSwapchains = swapchains.ptr,
+        .pImageIndices = &image_index,
         .pResults = null,
     };
 
-    const res = c.vkQueuePresentKHR(queue.presentQueue, &presentInfo);
+    const res = c.vkQueuePresentKHR(queue.present_queue, &present_info);
     if (res == c.VK_ERROR_OUT_OF_DATE_KHR or res == c.VK_SUBOPTIMAL_KHR) {
-        swapChainRebuild = true;
+        swapchain_rebuild = true;
     } else {
         try util.check_vk(res);
     }
 
-    currentFrame = (currentFrame + 1) % util.maxFramesInFligth;
+    current_frame = (current_frame + 1) % util.max_frames_in_fligth;
 }

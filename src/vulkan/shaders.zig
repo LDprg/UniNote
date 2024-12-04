@@ -2,55 +2,56 @@ const std = @import("std");
 
 const c = @import("../c.zig");
 
-const util = @import("util.zig");
 const device = @import("device.zig");
+const util = @import("util.zig");
 
-pub var shaderStages: []c.VkPipelineShaderStageCreateInfo = undefined;
-pub var alloc: std.mem.Allocator = undefined;
+pub var shader_stages: []c.VkPipelineShaderStageCreateInfo = undefined;
 
-var vertShaderModule: c.VkShaderModule = undefined;
-var fragShaderModule: c.VkShaderModule = undefined;
+var vert_shader_module: c.VkShaderModule = undefined;
+var frag_shader_module: c.VkShaderModule = undefined;
+
+var alloc: std.mem.Allocator = undefined;
 
 pub fn init(alloc_root: std.mem.Allocator) !void {
     alloc = alloc_root;
 
-    const vertShaderCode = try loadShader("shaders/vertex.spv");
-    const fragShaderCode = try loadShader("shaders/fragment.spv");
+    const vert_shader_code = try loadShader("shaders/vertex.spv");
+    const frag_shader_code = try loadShader("shaders/fragment.spv");
 
-    vertShaderModule = try createShaderModule(vertShaderCode);
-    fragShaderModule = try createShaderModule(fragShaderCode);
+    vert_shader_module = try createShaderModule(vert_shader_code);
+    frag_shader_module = try createShaderModule(frag_shader_code);
 
-    const vertShaderStageInfo = c.VkPipelineShaderStageCreateInfo{
+    const vert_shader_stage_info = c.VkPipelineShaderStageCreateInfo{
         .sType = c.VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
         .stage = c.VK_SHADER_STAGE_VERTEX_BIT,
-        .module = vertShaderModule,
+        .module = vert_shader_module,
         .pName = "main",
     };
 
-    const fragShaderStageInfo = c.VkPipelineShaderStageCreateInfo{
+    const frag_shader_stage_info = c.VkPipelineShaderStageCreateInfo{
         .sType = c.VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
         .stage = c.VK_SHADER_STAGE_FRAGMENT_BIT,
-        .module = fragShaderModule,
+        .module = frag_shader_module,
         .pName = "main",
     };
 
-    shaderStages = try alloc.alloc(c.VkPipelineShaderStageCreateInfo, 2);
-    shaderStages[0] = vertShaderStageInfo;
-    shaderStages[1] = fragShaderStageInfo;
+    shader_stages = try alloc.alloc(c.VkPipelineShaderStageCreateInfo, 2);
+    shader_stages[0] = vert_shader_stage_info;
+    shader_stages[1] = frag_shader_stage_info;
 }
 
 pub fn deinit() void {
-    c.vkDestroyShaderModule(device.device, fragShaderModule, null);
-    c.vkDestroyShaderModule(device.device, vertShaderModule, null);
+    c.vkDestroyShaderModule(device.device, frag_shader_module, null);
+    c.vkDestroyShaderModule(device.device, vert_shader_module, null);
 }
 
 pub fn loadShader(path: []const u8) ![]u8 {
     const file = try std.fs.cwd().openFile(path, .{});
     defer file.close();
 
-    const fileStat = try file.stat();
+    const file_stat = try file.stat();
 
-    const buf = try alloc.alloc(u8, fileStat.size);
+    const buf = try alloc.alloc(u8, file_stat.size);
 
     _ = try file.readAll(buf);
 
@@ -58,14 +59,14 @@ pub fn loadShader(path: []const u8) ![]u8 {
 }
 
 pub fn createShaderModule(code: []const u8) !c.VkShaderModule {
-    const createInfo = c.VkShaderModuleCreateInfo{
+    const create_info = c.VkShaderModuleCreateInfo{
         .sType = c.VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
         .codeSize = code.len,
         .pCode = @ptrCast(@alignCast(code.ptr)),
     };
 
-    var shaderModule: c.VkShaderModule = null;
-    try util.check_vk(c.vkCreateShaderModule(device.device, &createInfo, null, &shaderModule));
+    var shader_module: c.VkShaderModule = null;
+    try util.check_vk(c.vkCreateShaderModule(device.device, &create_info, null, &shader_module));
 
-    return shaderModule;
+    return shader_module;
 }

@@ -4,8 +4,8 @@ const c = @import("../c.zig");
 
 const window = @import("../window.zig");
 
-const util = @import("util.zig");
 const instance = @import("instance.zig");
+const util = @import("util.zig");
 
 pub var surface: c.VkSurfaceKHR = undefined;
 

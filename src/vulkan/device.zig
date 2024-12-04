@@ -2,12 +2,12 @@ const std = @import("std");
 
 const c = @import("../c.zig");
 
-const util = @import("util.zig");
 const instance = @import("instance.zig");
-const queueFamily = @import("queueFamily.zig");
-const physicalDevice = @import("physicalDevice.zig");
+const physical_device = @import("physical_device.zig");
+const queue_family = @import("queue_family.zig");
+const util = @import("util.zig");
 
-var queuePriority: f32 = 1.0;
+var queue_priority: f32 = 1.0;
 
 pub var device: c.VkDevice = undefined;
 
@@ -18,42 +18,42 @@ pub var alloc: std.mem.Allocator = undefined;
 pub fn init(alloc_root: std.mem.Allocator) !void {
     alloc = alloc_root;
 
-    var queueCreateInfos = std.ArrayList(c.VkDeviceQueueCreateInfo).init(alloc);
-    defer queueCreateInfos.deinit();
+    var queue_create_infos = std.ArrayList(c.VkDeviceQueueCreateInfo).init(alloc);
+    defer queue_create_infos.deinit();
 
     extensions = try alloc.alloc(?[*]const u8, 2);
     extensions[0] = c.VK_KHR_SWAPCHAIN_EXTENSION_NAME;
     extensions[1] = c.VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME;
 
-    const uniqueQueueFamilies = [_]u32{
-        queueFamily.graphicsFamily.?,
-        queueFamily.presentFamily.?,
+    const unique_queue_families = [_]u32{
+        queue_family.graphics_family.?,
+        queue_family.present_family.?,
     };
 
-    for (uniqueQueueFamilies) |family| {
-        const queueCreateInfo = c.VkDeviceQueueCreateInfo{
+    for (unique_queue_families) |family| {
+        const queue_create_info = c.VkDeviceQueueCreateInfo{
             .sType = c.VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
             .queueFamilyIndex = family,
             .queueCount = 1,
-            .pQueuePriorities = &queuePriority,
+            .pQueuePriorities = &queue_priority,
         };
-        try queueCreateInfos.append(queueCreateInfo);
+        try queue_create_infos.append(queue_create_info);
     }
 
-    const deviceFeatures = c.VkPhysicalDeviceFeatures{};
+    const device_features = c.VkPhysicalDeviceFeatures{};
 
-    const createInfo = c.VkDeviceCreateInfo{
+    const create_info = c.VkDeviceCreateInfo{
         .sType = c.VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-        .queueCreateInfoCount = @intCast(queueCreateInfos.items.len),
-        .pQueueCreateInfos = queueCreateInfos.items.ptr,
-        .pEnabledFeatures = &deviceFeatures,
+        .queueCreateInfoCount = @intCast(queue_create_infos.items.len),
+        .pQueueCreateInfos = queue_create_infos.items.ptr,
+        .pEnabledFeatures = &device_features,
         .enabledLayerCount = @intCast(instance.layers.len),
         .ppEnabledLayerNames = instance.layers.ptr,
         .enabledExtensionCount = @intCast(extensions.len),
         .ppEnabledExtensionNames = extensions.ptr,
     };
 
-    try util.check_vk(c.vkCreateDevice(physicalDevice.physicalDevice, &createInfo, null, &device));
+    try util.check_vk(c.vkCreateDevice(physical_device.physical_device, &create_info, null, &device));
 }
 
 pub fn deinit() void {

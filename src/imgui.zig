@@ -8,8 +8,8 @@ const window = @import("window.zig");
 
 var context: ?*c.ImGuiContext = undefined;
 
-var pipelineCache: c.VkPipelineCache = undefined;
-var descriptorPool: c.VkDescriptorPool = undefined;
+var pipeline_cache: c.VkPipelineCache = undefined;
+var descriptor_pool: c.VkDescriptorPool = undefined;
 
 pub fn init() !void {
     std.debug.print("Init Imgui\n", .{});
@@ -68,20 +68,20 @@ pub fn init() !void {
         .pPoolSizes = pool_sizes.ptr,
     };
 
-    try vulkan.util.check_vk(c.vkCreateDescriptorPool(vulkan.device.device, &pool_info, null, &descriptorPool));
+    try vulkan.util.check_vk(c.vkCreateDescriptorPool(vulkan.device.device, &pool_info, null, &descriptor_pool));
 
     var init_info = c.ImGui_ImplVulkan_InitInfo{
         .Instance = vulkan.instance.instance,
-        .PhysicalDevice = vulkan.physicalDevice.physicalDevice,
+        .PhysicalDevice = vulkan.physical_device.physical_device,
         .Device = vulkan.device.device,
-        .QueueFamily = vulkan.queueFamily.graphicsFamily.?,
-        .Queue = vulkan.queue.graphicsQueue,
-        .PipelineCache = pipelineCache,
-        .DescriptorPool = descriptorPool,
-        .RenderPass = vulkan.renderPass.renderPass,
+        .QueueFamily = vulkan.queue_family.graphics_family.?,
+        .Queue = vulkan.queue.graphics_queue,
+        .PipelineCache = pipeline_cache,
+        .DescriptorPool = descriptor_pool,
+        .RenderPass = vulkan.render_pass.render_pass,
         .Subpass = 0,
-        .MinImageCount = vulkan.swapChain.capabilities.minImageCount,
-        .ImageCount = @intCast(vulkan.swapChain.swapChainImages.len),
+        .MinImageCount = vulkan.swapchain.capabilities.minImageCount,
+        .ImageCount = @intCast(vulkan.swapchain.swapchain_images.len),
         .MSAASamples = c.VK_SAMPLE_COUNT_1_BIT,
         .Allocator = null,
         .CheckVkResultFn = vulkan.util.check_vk_c,
@@ -100,12 +100,12 @@ pub fn deinit() !void {
 
     c.igDestroyContext(context);
 
-    c.vkDestroyDescriptorPool(vulkan.device.device, descriptorPool, null);
+    c.vkDestroyDescriptorPool(vulkan.device.device, descriptor_pool, null);
 }
 
 pub fn processEvent(e: *const c.SDL_Event) void {
     if (e.type == c.SDL_EVENT_PEN_DOWN) {
-        const newE: *const c.SDL_Event = &c.SDL_Event{
+        const new_event: *const c.SDL_Event = &c.SDL_Event{
             .button = c.SDL_MouseButtonEvent{
                 .type = c.SDL_EVENT_MOUSE_BUTTON_DOWN,
                 .button = c.SDL_BUTTON_LEFT,
@@ -118,9 +118,9 @@ pub fn processEvent(e: *const c.SDL_Event) void {
             },
         };
 
-        _ = c.ImGui_ImplSDL3_ProcessEvent(newE);
+        _ = c.ImGui_ImplSDL3_ProcessEvent(new_event);
     } else if (e.type == c.SDL_EVENT_PEN_UP) {
-        const newE: *const c.SDL_Event = &c.SDL_Event{
+        const new_event: *const c.SDL_Event = &c.SDL_Event{
             .button = c.SDL_MouseButtonEvent{
                 .type = c.SDL_EVENT_MOUSE_BUTTON_UP,
                 .button = c.SDL_BUTTON_LEFT,
@@ -133,9 +133,9 @@ pub fn processEvent(e: *const c.SDL_Event) void {
             },
         };
 
-        _ = c.ImGui_ImplSDL3_ProcessEvent(newE);
+        _ = c.ImGui_ImplSDL3_ProcessEvent(new_event);
     } else if (e.type == c.SDL_EVENT_PEN_MOTION) {
-        const newE: *const c.SDL_Event = &c.SDL_Event{
+        const new_event: *const c.SDL_Event = &c.SDL_Event{
             .motion = c.SDL_MouseMotionEvent{
                 .type = c.SDL_EVENT_MOUSE_MOTION,
                 .x = e.pmotion.x,
@@ -147,7 +147,7 @@ pub fn processEvent(e: *const c.SDL_Event) void {
             },
         };
 
-        _ = c.ImGui_ImplSDL3_ProcessEvent(newE);
+        _ = c.ImGui_ImplSDL3_ProcessEvent(new_event);
     } else {
         _ = c.ImGui_ImplSDL3_ProcessEvent(e);
     }
@@ -160,10 +160,10 @@ pub fn update() void {
 }
 
 pub fn draw() !void {
-    if (!vulkan.swapChainRebuild) {
+    if (!vulkan.swapchain_rebuild) {
         c.igRender();
 
-        c.ImGui_ImplVulkan_RenderDrawData(c.igGetDrawData(), vulkan.commandBuffer.commandBuffers[vulkan.currentFrame], null);
+        c.ImGui_ImplVulkan_RenderDrawData(c.igGetDrawData(), vulkan.command_buffer.command_buffers[vulkan.current_frame], null);
     } else {
         c.igEndFrame();
     }
