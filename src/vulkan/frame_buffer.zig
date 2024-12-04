@@ -10,7 +10,7 @@ const util = @import("util.zig");
 
 pub var swapchain_frame_buffers: []c.VkFramebuffer = undefined;
 
-pub var alloc: std.mem.Allocator = undefined;
+var alloc: std.mem.Allocator = undefined;
 
 pub fn init(alloc_root: std.mem.Allocator) !void {
     alloc = alloc_root;

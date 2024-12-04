@@ -8,7 +8,7 @@ const util = @import("util.zig");
 
 pub var swapchain_image_views: []c.VkImageView = undefined;
 
-pub var alloc: std.mem.Allocator = undefined;
+var alloc: std.mem.Allocator = undefined;
 
 pub fn init(alloc_root: std.mem.Allocator) !void {
     alloc = alloc_root;

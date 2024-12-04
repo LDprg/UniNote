@@ -13,7 +13,7 @@ pub var device: c.VkDevice = undefined;
 
 pub var extensions: []?[*]const u8 = undefined;
 
-pub var alloc: std.mem.Allocator = undefined;
+var alloc: std.mem.Allocator = undefined;
 
 pub fn init(alloc_root: std.mem.Allocator) !void {
     alloc = alloc_root;
