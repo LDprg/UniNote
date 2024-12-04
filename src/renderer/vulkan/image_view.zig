@@ -2,9 +2,9 @@ const std = @import("std");
 
 const c = @import("root").c;
 
-const device = @import("device.zig");
-const swapchain = @import("swapchain.zig");
-const util = @import("util.zig");
+const device = @import("root").renderer.vulkan.device;
+const swapchain = @import("root").renderer.vulkan.swapchain;
+const util = @import("root").renderer.vulkan.util;
 
 pub var swapchain_image_views: []c.VkImageView = undefined;
 

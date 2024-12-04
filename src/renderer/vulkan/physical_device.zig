@@ -2,8 +2,8 @@ const std = @import("std");
 
 const c = @import("root").c;
 
-const instance = @import("instance.zig");
-const util = @import("util.zig");
+const instance = @import("root").renderer.vulkan.instance;
+const util = @import("root").renderer.vulkan.util;
 
 pub var physical_device: c.VkPhysicalDevice = undefined;
 

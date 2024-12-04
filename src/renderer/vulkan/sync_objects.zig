@@ -2,9 +2,9 @@ const std = @import("std");
 
 const c = @import("root").c;
 
-const device = @import("device.zig");
-const queue_family = @import("queue_family.zig");
-const util = @import("util.zig");
+const device = @import("root").renderer.vulkan.device;
+const queue_family = @import("root").renderer.vulkan.queue_family;
+const util = @import("root").renderer.vulkan.util;
 
 pub var image_available_semaphores: [util.max_frames_in_fligth]c.VkSemaphore = undefined;
 pub var render_finished_semaphores: [util.max_frames_in_fligth]c.VkSemaphore = undefined;

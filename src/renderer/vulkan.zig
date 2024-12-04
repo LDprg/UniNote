@@ -1,29 +1,30 @@
 const std = @import("std");
 
 const c = @import("root").c;
-const imgui = @import("root").imgui;
 
-pub const allocator = @import("./vulkan/allocator.zig");
-pub const command_buffer = @import("./vulkan/command_buffer.zig");
-pub const descriptor_pool = @import("./vulkan/descriptor_pool.zig");
-pub const descriptor_set_layout = @import("./vulkan/descriptor_set_layout.zig");
-pub const descriptor_sets = @import("./vulkan/descriptor_sets.zig");
-pub const device = @import("./vulkan/device.zig");
-pub const frame_buffer = @import("./vulkan/frame_buffer.zig");
-pub const image_view = @import("./vulkan/image_view.zig");
-pub const instance = @import("./vulkan/instance.zig");
-pub const physical_device = @import("./vulkan/physical_device.zig");
-pub const pipeline = @import("./vulkan/pipeline.zig");
-pub const queue = @import("./vulkan/queue.zig");
-pub const queue_family = @import("./vulkan/queue_family.zig");
-pub const render_pass = @import("./vulkan/render_pass.zig");
-pub const shaders = @import("./vulkan/shaders.zig");
-pub const surface = @import("./vulkan/surface.zig");
-pub const swapchain = @import("./vulkan/swapchain.zig");
-pub const sync_objects = @import("./vulkan/sync_objects.zig");
-pub const uniform_buffers = @import("./vulkan/uniform_buffers.zig");
-pub const util = @import("./vulkan/util.zig");
-pub const vertex_buffer = @import("./vulkan/vertex_buffer.zig");
+const imgui = @import("root").renderer.imgui;
+
+pub const allocator = @import("vulkan/allocator.zig");
+pub const command_buffer = @import("vulkan/command_buffer.zig");
+pub const descriptor_pool = @import("vulkan/descriptor_pool.zig");
+pub const descriptor_set_layout = @import("vulkan/descriptor_set_layout.zig");
+pub const descriptor_sets = @import("vulkan/descriptor_sets.zig");
+pub const device = @import("vulkan/device.zig");
+pub const frame_buffer = @import("vulkan/frame_buffer.zig");
+pub const image_view = @import("vulkan/image_view.zig");
+pub const instance = @import("vulkan/instance.zig");
+pub const physical_device = @import("vulkan/physical_device.zig");
+pub const pipeline = @import("vulkan/pipeline.zig");
+pub const queue = @import("vulkan/queue.zig");
+pub const queue_family = @import("vulkan/queue_family.zig");
+pub const render_pass = @import("vulkan/render_pass.zig");
+pub const shaders = @import("vulkan/shaders.zig");
+pub const surface = @import("vulkan/surface.zig");
+pub const swapchain = @import("vulkan/swapchain.zig");
+pub const sync_objects = @import("vulkan/sync_objects.zig");
+pub const uniform_buffers = @import("vulkan/uniform_buffers.zig");
+pub const util = @import("vulkan/util.zig");
+pub const vertex_buffer = @import("vulkan/vertex_buffer.zig");
 
 pub var image_index: u32 = undefined;
 pub var current_frame: u32 = 0;

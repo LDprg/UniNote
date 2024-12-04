@@ -1,8 +1,10 @@
 const std = @import("std");
 
 const c = @import("root").c;
-const vulkan = @import("root").vulkan;
-const window = @import("root").window;
+
+const window = @import("root").core.window;
+
+const vulkan = @import("root").renderer.vulkan;
 
 var context: ?*c.ImGuiContext = undefined;
 
@@ -41,7 +43,7 @@ pub fn init() !void {
 
     c.igStyleColorsDark(null);
 
-    _ = c.ImGui_ImplSDL3_InitForVulkan(window.getNativeWindow());
+    _ = c.ImGui_ImplSDL3_InitForVulkan(window.window);
 
     const pool_sizes: []const c.VkDescriptorPoolSize = &.{
         .{ .type = c.VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, .descriptorCount = 1 },
@@ -88,7 +90,7 @@ pub fn init() !void {
     _ = c.ImGui_ImplVulkan_CreateFontsTexture();
 }
 
-pub fn deinit() !void {
+pub fn deinit() void {
     std.debug.print("Deinit imgui\n", .{});
     _ = c.vkDeviceWaitIdle(vulkan.device.device);
 

@@ -2,13 +2,13 @@ const std = @import("std");
 
 const c = @import("root").c;
 
-const descriptor_set_layout = @import("descriptor_set_layout.zig");
-const device = @import("device.zig");
-const render_pass = @import("render_pass.zig");
-const shaders = @import("shaders.zig");
-const swapchain = @import("swapchain.zig");
-const util = @import("util.zig");
-const vertex_buffer = @import("vertex_buffer.zig");
+const descriptor_set_layout = @import("root").renderer.vulkan.descriptor_set_layout;
+const device = @import("root").renderer.vulkan.device;
+const render_pass = @import("root").renderer.vulkan.render_pass;
+const shaders = @import("root").renderer.vulkan.shaders;
+const swapchain = @import("root").renderer.vulkan.swapchain;
+const util = @import("root").renderer.vulkan.util;
+const vertex_buffer = @import("root").renderer.vulkan.vertex_buffer;
 
 const dynamic_states: []const c.VkDynamicState = &.{
     c.VK_DYNAMIC_STATE_VIEWPORT,

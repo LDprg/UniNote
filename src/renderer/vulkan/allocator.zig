@@ -2,10 +2,10 @@ const std = @import("std");
 
 const c = @import("root").c;
 
-const device = @import("device.zig");
-const instance = @import("instance.zig");
-const physical_device = @import("physical_device.zig");
-const util = @import("util.zig");
+const device = @import("root").renderer.vulkan.device;
+const instance = @import("root").renderer.vulkan.instance;
+const physical_device = @import("root").renderer.vulkan.physical_device;
+const util = @import("root").renderer.vulkan.util;
 
 pub var allocator: c.VmaAllocator = undefined;
 

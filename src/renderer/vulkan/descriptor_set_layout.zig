@@ -2,8 +2,8 @@ const std = @import("std");
 
 const c = @import("root").c;
 
-const device = @import("device.zig");
-const util = @import("util.zig");
+const device = @import("root").renderer.vulkan.device;
+const util = @import("root").renderer.vulkan.util;
 
 pub var descriptor_set_layout: c.VkDescriptorSetLayout = undefined;
 

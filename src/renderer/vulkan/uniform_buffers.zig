@@ -2,9 +2,9 @@ const std = @import("std");
 
 const c = @import("root").c;
 
-const allocator = @import("allocator.zig");
-const util = @import("util.zig");
-const vertex_buffer = @import("vertex_buffer.zig");
+const allocator = @import("root").renderer.vulkan.allocator;
+const util = @import("root").renderer.vulkan.util;
+const vertex_buffer = @import("root").renderer.vulkan.vertex_buffer;
 
 pub const UniformBufferObject = struct {
     scale: [2]f32,

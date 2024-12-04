@@ -2,11 +2,11 @@ const std = @import("std");
 
 const c = @import("root").c;
 
-const device = @import("device.zig");
-const image_view = @import("image_view.zig");
-const render_pass = @import("render_pass.zig");
-const swapchain = @import("swapchain.zig");
-const util = @import("util.zig");
+const device = @import("root").renderer.vulkan.device;
+const image_view = @import("root").renderer.vulkan.image_view;
+const render_pass = @import("root").renderer.vulkan.render_pass;
+const swapchain = @import("root").renderer.vulkan.swapchain;
+const util = @import("root").renderer.vulkan.util;
 
 pub var swapchain_frame_buffers: []c.VkFramebuffer = undefined;
 

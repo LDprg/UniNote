@@ -2,16 +2,16 @@ const std = @import("std");
 
 const c = @import("root").c;
 
-const allocator = @import("allocator.zig");
-const command_buffer = @import("command_buffer.zig");
-const device = @import("device.zig");
-const frame_buffer = @import("frame_buffer.zig");
-const physical_device = @import("physical_device.zig");
-const queue = @import("queue.zig");
-const queue_family = @import("queue_family.zig");
-const render_pass = @import("render_pass.zig");
-const swapchain = @import("swapchain.zig");
-const util = @import("util.zig");
+const allocator = @import("root").renderer.vulkan.allocator;
+const command_buffer = @import("root").renderer.vulkan.command_buffer;
+const device = @import("root").renderer.vulkan.device;
+const frame_buffer = @import("root").renderer.vulkan.frame_buffer;
+const physical_device = @import("root").renderer.vulkan.physical_device;
+const queue = @import("root").renderer.vulkan.queue;
+const queue_family = @import("root").renderer.vulkan.queue_family;
+const render_pass = @import("root").renderer.vulkan.render_pass;
+const swapchain = @import("root").renderer.vulkan.swapchain;
+const util = @import("root").renderer.vulkan.util;
 
 pub var vertex_buffer: c.VkBuffer = undefined;
 pub var vertex_buffer_alloc: c.VmaAllocation = undefined;

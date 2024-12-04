@@ -1,13 +1,14 @@
 const std = @import("std");
 
 const c = @import("root").c;
-const window = @import("root").window;
 
-const device = @import("device.zig");
-const physical_device = @import("physical_device.zig");
-const queue_family = @import("queue_family.zig");
-const surface = @import("surface.zig");
-const util = @import("util.zig");
+const window = @import("root").core.window;
+
+const device = @import("root").renderer.vulkan.device;
+const physical_device = @import("root").renderer.vulkan.physical_device;
+const queue_family = @import("root").renderer.vulkan.queue_family;
+const surface = @import("root").renderer.vulkan.surface;
+const util = @import("root").renderer.vulkan.util;
 
 pub var swapchain: c.VkSwapchainKHR = undefined;
 pub var swapchain_images: []c.VkImage = undefined;

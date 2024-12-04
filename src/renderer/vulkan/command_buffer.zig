@@ -2,12 +2,12 @@ const std = @import("std");
 
 const c = @import("root").c;
 
-const device = @import("device.zig");
-const frame_buffer = @import("frame_buffer.zig");
-const queue_family = @import("queue_family.zig");
-const render_pass = @import("render_pass.zig");
-const swapchain = @import("swapchain.zig");
-const util = @import("util.zig");
+const device = @import("root").renderer.vulkan.device;
+const frame_buffer = @import("root").renderer.vulkan.frame_buffer;
+const queue_family = @import("root").renderer.vulkan.queue_family;
+const render_pass = @import("root").renderer.vulkan.render_pass;
+const swapchain = @import("root").renderer.vulkan.swapchain;
+const util = @import("root").renderer.vulkan.util;
 
 pub var command_pool: c.VkCommandPool = undefined;
 pub var command_buffers: [util.max_frames_in_fligth]c.VkCommandBuffer = undefined;

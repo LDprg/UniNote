@@ -1,9 +1,10 @@
 const std = @import("std");
 
 const c = @import("root").c;
+
 const window = @import("root").window;
 
-const util = @import("util.zig");
+const util = @import("root").renderer.vulkan.util;
 
 pub var instance: c.VkInstance = undefined;
 

@@ -2,10 +2,10 @@ const std = @import("std");
 
 const c = @import("root").c;
 
-const instance = @import("instance.zig");
-const physical_device = @import("physical_device.zig");
-const queue_family = @import("queue_family.zig");
-const util = @import("util.zig");
+const instance = @import("root").renderer.vulkan.instance;
+const physical_device = @import("root").renderer.vulkan.physical_device;
+const queue_family = @import("root").renderer.vulkan.queue_family;
+const util = @import("root").renderer.vulkan.util;
 
 var queue_priority: f32 = 1.0;
 

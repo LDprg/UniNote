@@ -2,9 +2,9 @@ const std = @import("std");
 
 const c = @import("root").c;
 
-const physical_device = @import("physical_device.zig");
-const surface = @import("surface.zig");
-const util = @import("util.zig");
+const physical_device = @import("root").renderer.vulkan.physical_device;
+const surface = @import("root").renderer.vulkan.surface;
+const util = @import("root").renderer.vulkan.util;
 
 pub var graphics_family: ?u32 = undefined;
 pub var present_family: ?u32 = undefined;

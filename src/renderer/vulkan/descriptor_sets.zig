@@ -2,11 +2,11 @@ const std = @import("std");
 
 const c = @import("root").c;
 
-const descriptor_pool = @import("descriptor_pool.zig");
-const descriptor_set_layout = @import("descriptor_set_layout.zig");
-const device = @import("device.zig");
-const uniform_buffers = @import("uniform_buffers.zig");
-const util = @import("util.zig");
+const descriptor_pool = @import("root").renderer.vulkan.descriptor_pool;
+const descriptor_set_layout = @import("root").renderer.vulkan.descriptor_set_layout;
+const device = @import("root").renderer.vulkan.device;
+const uniform_buffers = @import("root").renderer.vulkan.uniform_buffers;
+const util = @import("root").renderer.vulkan.util;
 
 pub var descriptor_sets: []c.VkDescriptorSet = undefined;
 
