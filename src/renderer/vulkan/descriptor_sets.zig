@@ -27,7 +27,7 @@ pub fn init(alloc: std.mem.Allocator) !void {
 
     for (0..util.max_frames_in_fligth) |i| {
         const buffer_info = c.VkDescriptorBufferInfo{
-            .buffer = uniform_buffers.uniform_buffers[i],
+            .buffer = uniform_buffers.uniform_buffers[i].buffer,
             .offset = 0,
             .range = c.VK_WHOLE_SIZE,
         };

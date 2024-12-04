@@ -22,10 +22,10 @@ pub fn init(alloc_root: std.mem.Allocator) !void {
 
 pub fn deinit() void {}
 
-pub fn processEvent(e: c.SDL_Event) !void {
-    switch (@as(event.event, @enumFromInt(e.type))) {
-        event.event.quit => application.close(),
-        event.event.mouse_motion, event.event.pen_motion => {
+pub fn processEvent(e: *const c.SDL_Event) !void {
+    switch (@as(event.Event, @enumFromInt(e.type))) {
+        event.Event.quit => application.close(),
+        event.Event.mouse_motion, event.Event.pen_motion => {
             x = e.motion.x;
             y = e.motion.y;
 

@@ -13,12 +13,6 @@ const render_pass = @import("root").renderer.vulkan.render_pass;
 const swapchain = @import("root").renderer.vulkan.swapchain;
 const util = @import("root").renderer.vulkan.util;
 
-pub var vertex_buffer: c.VkBuffer = undefined;
-pub var vertex_buffer_alloc: c.VmaAllocation = undefined;
-
-pub var index_buffer: c.VkBuffer = undefined;
-pub var index_buffer_alloc: c.VmaAllocation = undefined;
-
 pub const Vertex = struct {
     pos: [2]f32,
     color: [4]f32,
@@ -49,68 +43,60 @@ pub const Vertex = struct {
     }
 };
 
-pub var vertices: []Vertex = undefined;
-pub var indices: []u16 = undefined;
+pub const Buffer = struct {
+    buffer: c.VkBuffer,
+    buffer_alloc: c.VmaAllocation,
+    buffer_alloc_info: ?c.VmaAllocationInfo,
+};
 
-pub fn init() !void {
-    var vert = [_]Vertex{
-        Vertex{ .pos = [2]f32{ 100, 100 }, .color = [4]f32{ 1, 0, 0, 1 } },
-        Vertex{ .pos = [2]f32{ 500, 100 }, .color = [4]f32{ 0, 1, 0, 1 } },
-        Vertex{ .pos = [2]f32{ 500, 500 }, .color = [4]f32{ 0, 0, 1, 1 } },
-        Vertex{ .pos = [2]f32{ 100, 500 }, .color = [4]f32{ 1, 0, 1, 1 } },
-    };
-    vertices = vert[0..];
+pub var vertex_buffer: Buffer = undefined;
+pub var index_buffer: Buffer = undefined;
 
-    var ind = [_]u16{ 0, 1, 2, 2, 3, 0 };
-    indices = ind[0..];
-
-    const buffer_size: c.VkDeviceSize = @sizeOf(Vertex) * vertices.len;
-    try createBufferStaging(&vertex_buffer, &vertex_buffer_alloc, Vertex, vertices, c.VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, buffer_size);
-    try createBufferStaging(&index_buffer, &index_buffer_alloc, u16, indices, c.VK_BUFFER_USAGE_INDEX_BUFFER_BIT, buffer_size);
+pub fn init(vertices: []Vertex, indices: []u16) !void {
+    try createBufferStaging(&vertex_buffer, Vertex, vertices, c.VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+    try createBufferStaging(&index_buffer, u16, indices, c.VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
 }
 
 pub fn deinit() void {
-    c.vmaDestroyBuffer(allocator.allocator, vertex_buffer, vertex_buffer_alloc);
-    c.vmaDestroyBuffer(allocator.allocator, index_buffer, index_buffer_alloc);
+    c.vmaDestroyBuffer(allocator.allocator, vertex_buffer.buffer, vertex_buffer.buffer_alloc);
+    c.vmaDestroyBuffer(allocator.allocator, index_buffer.buffer, index_buffer.buffer_alloc);
 }
 
-fn createBufferStaging(buffer: *c.VkBuffer, buffer_alloc: *c.VmaAllocation, comptime result_type: type, result: []result_type, flags: c.VmaAllocationCreateFlags, size: c.VkDeviceSize) !void {
-    var staging_buffer: c.VkBuffer = null;
-    var staging_buffer_alloc: c.VmaAllocation = null;
-    var staging_buffer_alloc_info = c.VmaAllocationInfo{};
+fn createBufferStaging(buffer: *Buffer, comptime result_type: type, result: []result_type, flags: c.VmaAllocationCreateFlags) !void {
+    const size: c.VkDeviceSize = @sizeOf(result_type) * result.len;
+
+    var staging_buffer = Buffer{
+        .buffer = null,
+        .buffer_alloc = null,
+        .buffer_alloc_info = c.VmaAllocationInfo{},
+    };
 
     try createBuffer(
         size,
         c.VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
         c.VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | c.VMA_ALLOCATION_CREATE_MAPPED_BIT,
         &staging_buffer,
-        &staging_buffer_alloc,
-        &staging_buffer_alloc_info,
     );
 
-    @memcpy(@as([*]result_type, @ptrCast(@alignCast(staging_buffer_alloc_info.pMappedData))), result);
+    @memcpy(@as([*]result_type, @ptrCast(@alignCast(staging_buffer.buffer_alloc_info.?.pMappedData))), result);
 
     try createBuffer(
         size,
         @as(u32, @intCast(c.VK_BUFFER_USAGE_TRANSFER_DST_BIT)) | flags,
         0,
         buffer,
-        buffer_alloc,
-        null,
     );
 
-    try copyBuffer(staging_buffer, buffer.*, size);
+    try copyBuffer(staging_buffer.buffer, buffer.buffer, size);
 
-    c.vmaDestroyBuffer(allocator.allocator, staging_buffer, staging_buffer_alloc);
+    c.vmaDestroyBuffer(allocator.allocator, staging_buffer.buffer, staging_buffer.buffer_alloc);
 }
 
 pub fn createBuffer(
     size: c.VkDeviceSize,
     usage: c.VkBufferUsageFlags,
     flags: c.VmaAllocationCreateFlags,
-    buffer: *c.VkBuffer,
-    buffer_alloc: *c.VmaAllocation,
-    buffer_alloc_info: ?*c.VmaAllocationInfo,
+    buffer: *Buffer,
 ) !void {
     const buffer_info = c.VkBufferCreateInfo{
         .sType = c.VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
@@ -124,7 +110,14 @@ pub fn createBuffer(
         .flags = flags,
     };
 
-    try util.check_vk(c.vmaCreateBuffer(allocator.allocator, &buffer_info, &alloc_create_info, buffer, buffer_alloc, buffer_alloc_info));
+    try util.check_vk(c.vmaCreateBuffer(
+        allocator.allocator,
+        &buffer_info,
+        &alloc_create_info,
+        &buffer.buffer,
+        &buffer.buffer_alloc,
+        if (buffer.buffer_alloc_info != null) &buffer.buffer_alloc_info.? else null,
+    ));
 }
 
 fn copyBuffer(src_buffer: c.VkBuffer, dst_buffer: c.VkBuffer, size: c.VkDeviceSize) !void {

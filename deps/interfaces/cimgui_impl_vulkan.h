@@ -65,7 +65,8 @@ struct ImGui_ImplVulkanH_Window
     uint32_t SemaphoreIndex;
     ImGui_ImplVulkanH_Frame* Frames;
     ImGui_ImplVulkanH_FrameSemaphores* FrameSemaphores;
-};CIMGUI_API bool ImGui_ImplVulkan_Init(ImGui_ImplVulkan_InitInfo* info);
+};
+CIMGUI_API bool ImGui_ImplVulkan_Init(ImGui_ImplVulkan_InitInfo* info);
 CIMGUI_API void ImGui_ImplVulkan_Shutdown(void);
 CIMGUI_API void ImGui_ImplVulkan_NewFrame(void);
 CIMGUI_API void ImGui_ImplVulkan_RenderDrawData(ImDrawData* draw_data,VkCommandBuffer command_buffer,VkPipeline pipeline);

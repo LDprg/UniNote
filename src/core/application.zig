@@ -33,7 +33,7 @@ pub fn run(alloc: std.mem.Allocator) !void {
         while (window.getEvent()) |e| {
             imgui.processEvent(&e);
 
-            try app.processEvent(e);
+            try app.processEvent(&e);
         }
 
         imgui.update();

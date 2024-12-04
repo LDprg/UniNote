@@ -2,7 +2,7 @@ const std = @import("std");
 
 const c = @import("root").c;
 
-pub const event = enum(u32) {
+pub const Event = enum(u32) {
     quit = c.SDL_EVENT_QUIT,
     terminating = c.SDL_EVENT_TERMINATING,
     low_memory = c.SDL_EVENT_LOW_MEMORY,

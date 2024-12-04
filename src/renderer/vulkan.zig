@@ -58,19 +58,28 @@ pub fn init(alloc: std.mem.Allocator) !void {
     try frame_buffer.init(arena);
     try command_buffer.init();
     try sync_objects.init();
-    try vertex_buffer.init();
     try uniform_buffers.init(arena);
     try descriptor_pool.init();
     try descriptor_sets.init(arena);
+
+    var vertex = [_]vertex_buffer.Vertex{
+        vertex_buffer.Vertex{ .pos = [2]f32{ 100, 100 }, .color = [4]f32{ 1, 0, 0, 1 } },
+        vertex_buffer.Vertex{ .pos = [2]f32{ 500, 100 }, .color = [4]f32{ 0, 1, 0, 1 } },
+        vertex_buffer.Vertex{ .pos = [2]f32{ 500, 500 }, .color = [4]f32{ 0, 0, 1, 1 } },
+        vertex_buffer.Vertex{ .pos = [2]f32{ 100, 500 }, .color = [4]f32{ 1, 0, 1, 1 } },
+    };
+    var index = [_]u16{ 0, 1, 2, 2, 3, 0 };
+    try vertex_buffer.init(&vertex, &index);
 }
 
 pub fn deinit() void {
     std.debug.print("Deinit Vulkan\n", .{});
     _ = c.vkDeviceWaitIdle(device.device);
 
+    vertex_buffer.deinit();
+
     descriptor_pool.deinit();
     uniform_buffers.deinit();
-    vertex_buffer.deinit();
     sync_objects.deinit();
     command_buffer.deinit();
     frame_buffer.deinit();
@@ -132,7 +141,7 @@ pub fn clear() !void {
         pipeline.graphics_pipeline,
     );
 
-    const vertex_buffers: [*]const c.VkBuffer = &.{vertex_buffer.vertex_buffer};
+    const vertex_buffers: [*]const c.VkBuffer = &.{vertex_buffer.vertex_buffer.buffer};
     const offsets: [*]const c.VkDeviceSize = &.{0};
     c.vkCmdBindVertexBuffers(
         command_buffer.command_buffers[current_frame],
@@ -143,7 +152,7 @@ pub fn clear() !void {
     );
     c.vkCmdBindIndexBuffer(
         command_buffer.command_buffers[current_frame],
-        vertex_buffer.index_buffer,
+        vertex_buffer.index_buffer.buffer,
         0,
         c.VK_INDEX_TYPE_UINT16,
     );
@@ -185,14 +194,7 @@ pub fn clear() !void {
         null,
     );
 
-    c.vkCmdDrawIndexed(
-        command_buffer.command_buffers[current_frame],
-        @intCast(vertex_buffer.indices.len),
-        1,
-        0,
-        0,
-        0,
-    );
+    c.vkCmdDrawIndexed(command_buffer.command_buffers[current_frame], 6, 1, 0, 0, 0);
 }
 
 pub fn draw() !void {
@@ -207,7 +209,7 @@ pub fn draw() !void {
     }};
 
     @memcpy(
-        @as([*]uniform_buffers.UniformBufferObject, @ptrCast(@alignCast(uniform_buffers.uniform_buffers_alloc_info[current_frame].pMappedData))),
+        @as([*]uniform_buffers.UniformBufferObject, @ptrCast(@alignCast(uniform_buffers.uniform_buffers[current_frame].buffer_alloc_info.?.pMappedData))),
         &ubo,
     );
 
