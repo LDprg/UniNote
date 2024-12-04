@@ -24,7 +24,12 @@ pub fn init(alloc: std.mem.Allocator) !void {
         }
 
         var present_support: c.VkBool32 = c.VK_FALSE;
-        try util.check_vk(c.vkGetPhysicalDeviceSurfaceSupportKHR(physical_device.physical_device, @intCast(i), surface.surface, &present_support));
+        try util.check_vk(c.vkGetPhysicalDeviceSurfaceSupportKHR(
+            physical_device.physical_device,
+            @intCast(i),
+            surface.surface,
+            &present_support,
+        ));
         if (present_support == c.VK_TRUE) {
             present_family = @intCast(i);
         }

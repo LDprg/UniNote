@@ -52,7 +52,14 @@ pub const Vertex = struct {
 pub var vertices: []Vertex = undefined;
 pub var indices: []u16 = undefined;
 
-pub fn createBuffer(size: c.VkDeviceSize, usage: c.VkBufferUsageFlags, flags: c.VmaAllocationCreateFlags, buffer: *c.VkBuffer, bufferAlloc: *c.VmaAllocation, bufferAllocInfo: ?*c.VmaAllocationInfo) !void {
+pub fn createBuffer(
+    size: c.VkDeviceSize,
+    usage: c.VkBufferUsageFlags,
+    flags: c.VmaAllocationCreateFlags,
+    buffer: *c.VkBuffer,
+    bufferAlloc: *c.VmaAllocation,
+    bufferAllocInfo: ?*c.VmaAllocationInfo,
+) !void {
     const buffer_info = c.VkBufferCreateInfo{
         .sType = c.VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
         .size = size,
@@ -114,11 +121,25 @@ fn createVertexBuffer() !void {
     var staging_buffer_alloc: c.VmaAllocation = null;
     var staging_buffer_alloc_info = c.VmaAllocationInfo{};
 
-    try createBuffer(buffer_size, c.VK_BUFFER_USAGE_TRANSFER_SRC_BIT, c.VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | c.VMA_ALLOCATION_CREATE_MAPPED_BIT, &staging_buffer, &staging_buffer_alloc, &staging_buffer_alloc_info);
+    try createBuffer(
+        buffer_size,
+        c.VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        c.VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | c.VMA_ALLOCATION_CREATE_MAPPED_BIT,
+        &staging_buffer,
+        &staging_buffer_alloc,
+        &staging_buffer_alloc_info,
+    );
 
     @memcpy(@as([*]Vertex, @ptrCast(@alignCast(staging_buffer_alloc_info.pMappedData))), vertices);
 
-    try createBuffer(buffer_size, c.VK_BUFFER_USAGE_TRANSFER_DST_BIT | c.VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, 0, &vertex_buffer, &vertex_buffer_alloc, null);
+    try createBuffer(
+        buffer_size,
+        c.VK_BUFFER_USAGE_TRANSFER_DST_BIT | c.VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+        0,
+        &vertex_buffer,
+        &vertex_buffer_alloc,
+        null,
+    );
 
     try copyBuffer(staging_buffer, vertex_buffer, buffer_size);
 
@@ -132,11 +153,25 @@ fn createIndexBuffer() !void {
     var staging_buffer_alloc: c.VmaAllocation = null;
     var staging_buffer_alloc_info = c.VmaAllocationInfo{};
 
-    try createBuffer(buffer_size, c.VK_BUFFER_USAGE_TRANSFER_SRC_BIT, c.VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | c.VMA_ALLOCATION_CREATE_MAPPED_BIT, &staging_buffer, &staging_buffer_alloc, &staging_buffer_alloc_info);
+    try createBuffer(
+        buffer_size,
+        c.VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        c.VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | c.VMA_ALLOCATION_CREATE_MAPPED_BIT,
+        &staging_buffer,
+        &staging_buffer_alloc,
+        &staging_buffer_alloc_info,
+    );
 
     @memcpy(@as([*]u16, @ptrCast(@alignCast(staging_buffer_alloc_info.pMappedData))), indices);
 
-    try createBuffer(buffer_size, c.VK_BUFFER_USAGE_TRANSFER_DST_BIT | c.VK_BUFFER_USAGE_INDEX_BUFFER_BIT, 0, &index_buffer, &index_buffer_alloc, null);
+    try createBuffer(
+        buffer_size,
+        c.VK_BUFFER_USAGE_TRANSFER_DST_BIT | c.VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+        0,
+        &index_buffer,
+        &index_buffer_alloc,
+        null,
+    );
 
     try copyBuffer(staging_buffer, index_buffer, buffer_size);
 

@@ -47,10 +47,20 @@ pub fn init(alloc_root: std.mem.Allocator) !void {
 
     // init presentMode
     var present_mode_count: u32 = 0;
-    try util.check_vk(c.vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device.physical_device, surface.surface, &present_mode_count, null));
+    try util.check_vk(c.vkGetPhysicalDeviceSurfacePresentModesKHR(
+        physical_device.physical_device,
+        surface.surface,
+        &present_mode_count,
+        null,
+    ));
 
     present_modes = try alloc.alloc(c.VkPresentModeKHR, present_mode_count);
-    try util.check_vk(c.vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device.physical_device, surface.surface, &present_mode_count, present_modes.ptr));
+    try util.check_vk(c.vkGetPhysicalDeviceSurfacePresentModesKHR(
+        physical_device.physical_device,
+        surface.surface,
+        &present_mode_count,
+        present_modes.ptr,
+    ));
     try std.testing.expect(present_modes.len > 0);
 
     present_mode = c.VK_PRESENT_MODE_FIFO_KHR;

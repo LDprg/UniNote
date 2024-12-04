@@ -22,7 +22,14 @@ pub fn init(alloc: std.mem.Allocator) !void {
     uniform_buffers_alloc_info = try alloc.alloc(c.VmaAllocationInfo, util.max_frames_in_fligth);
 
     for (0..util.max_frames_in_fligth) |i| {
-        try vertex_buffer.createBuffer(buffer_size, c.VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, c.VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | c.VMA_ALLOCATION_CREATE_MAPPED_BIT, &uniform_buffers[i], &uniform_buffers_alloc[i], &uniform_buffers_alloc_info[i]);
+        try vertex_buffer.createBuffer(
+            buffer_size,
+            c.VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+            c.VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | c.VMA_ALLOCATION_CREATE_MAPPED_BIT,
+            &uniform_buffers[i],
+            &uniform_buffers_alloc[i],
+            &uniform_buffers_alloc_info[i],
+        );
     }
 }
 

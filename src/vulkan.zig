@@ -103,7 +103,14 @@ pub fn rebuildSwapChain() !void {
 pub fn clear() !void {
     try util.check_vk(c.vkWaitForFences(device.device, 1, &sync_objects.in_flight_fences[current_frame], c.VK_TRUE, c.UINT64_MAX));
 
-    const res = c.vkAcquireNextImageKHR(device.device, swapchain.swapchain, c.UINT64_MAX, sync_objects.image_available_semaphores[current_frame], null, &image_index);
+    const res = c.vkAcquireNextImageKHR(
+        device.device,
+        swapchain.swapchain,
+        c.UINT64_MAX,
+        sync_objects.image_available_semaphores[current_frame],
+        null,
+        &image_index,
+    );
 
     if (res == c.VK_ERROR_OUT_OF_DATE_KHR) {
         swapchain_rebuild = true;
@@ -117,12 +124,27 @@ pub fn clear() !void {
 
     try command_buffer.beginCommandBuffer(command_buffer.command_buffers[current_frame], image_index);
 
-    c.vkCmdBindPipeline(command_buffer.command_buffers[current_frame], c.VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.graphics_pipeline);
+    c.vkCmdBindPipeline(
+        command_buffer.command_buffers[current_frame],
+        c.VK_PIPELINE_BIND_POINT_GRAPHICS,
+        pipeline.graphics_pipeline,
+    );
 
     const vertex_buffers: [*]const c.VkBuffer = &.{vertex_buffer.vertex_buffer};
     const offsets: [*]const c.VkDeviceSize = &.{0};
-    c.vkCmdBindVertexBuffers(command_buffer.command_buffers[current_frame], 0, 1, vertex_buffers, offsets);
-    c.vkCmdBindIndexBuffer(command_buffer.command_buffers[current_frame], vertex_buffer.index_buffer, 0, c.VK_INDEX_TYPE_UINT16);
+    c.vkCmdBindVertexBuffers(
+        command_buffer.command_buffers[current_frame],
+        0,
+        1,
+        vertex_buffers,
+        offsets,
+    );
+    c.vkCmdBindIndexBuffer(
+        command_buffer.command_buffers[current_frame],
+        vertex_buffer.index_buffer,
+        0,
+        c.VK_INDEX_TYPE_UINT16,
+    );
 
     const viewport = c.VkViewport{
         .x = 0.0,
@@ -132,17 +154,43 @@ pub fn clear() !void {
         .minDepth = 0.0,
         .maxDepth = 1.0,
     };
-    c.vkCmdSetViewport(command_buffer.command_buffers[current_frame], 0, 1, &viewport);
+    c.vkCmdSetViewport(
+        command_buffer.command_buffers[current_frame],
+        0,
+        1,
+        &viewport,
+    );
 
     const scissor = c.VkRect2D{
         .offset = .{ .x = 0, .y = 0 },
         .extent = swapchain.extent,
     };
-    c.vkCmdSetScissor(command_buffer.command_buffers[current_frame], 0, 1, &scissor);
+    c.vkCmdSetScissor(
+        command_buffer.command_buffers[current_frame],
+        0,
+        1,
+        &scissor,
+    );
 
-    c.vkCmdBindDescriptorSets(command_buffer.command_buffers[current_frame], c.VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipeline_layout, 0, 1, &descriptor_sets.descriptor_sets[current_frame], 0, null);
+    c.vkCmdBindDescriptorSets(
+        command_buffer.command_buffers[current_frame],
+        c.VK_PIPELINE_BIND_POINT_GRAPHICS,
+        pipeline.pipeline_layout,
+        0,
+        1,
+        &descriptor_sets.descriptor_sets[current_frame],
+        0,
+        null,
+    );
 
-    c.vkCmdDrawIndexed(command_buffer.command_buffers[current_frame], @intCast(vertex_buffer.indices.len), 1, 0, 0, 0);
+    c.vkCmdDrawIndexed(
+        command_buffer.command_buffers[current_frame],
+        @intCast(vertex_buffer.indices.len),
+        1,
+        0,
+        0,
+        0,
+    );
 }
 
 pub fn draw() !void {
@@ -150,7 +198,10 @@ pub fn draw() !void {
         .scale = [2]f32{ @floatFromInt(swapchain.extent.width), @floatFromInt(swapchain.extent.height) },
     }};
 
-    @memcpy(@as([*]uniform_buffers.UniformBufferObject, @ptrCast(@alignCast(uniform_buffers.uniform_buffers_alloc_info[current_frame].pMappedData))), &ubo);
+    @memcpy(
+        @as([*]uniform_buffers.UniformBufferObject, @ptrCast(@alignCast(uniform_buffers.uniform_buffers_alloc_info[current_frame].pMappedData))),
+        &ubo,
+    );
 
     try command_buffer.endCommandBuffer(command_buffer.command_buffers[current_frame]);
 
