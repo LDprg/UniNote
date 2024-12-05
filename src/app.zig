@@ -36,6 +36,7 @@ pub fn init(alloc_root: std.mem.Allocator) !void {
         vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 200, 200 }, .color = [4]f32{ 1, 1, 1, 1 } },
         vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 700, 200 }, .color = [4]f32{ 1, 1, 1, 1 } },
         vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 700, 700 }, .color = [4]f32{ 1, 1, 1, 1 } },
+        vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 700, 700 }, .color = [4]f32{ 1, 1, 1, 1 } },
         vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 200, 700 }, .color = [4]f32{ 1, 1, 1, 1 } },
         vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 200, 200 }, .color = [4]f32{ 1, 1, 1, 1 } },
     };
@@ -54,17 +55,22 @@ pub fn processEvent(e: *const c.SDL_Event) !void {
             x = e.motion.x;
             y = e.motion.y;
 
-            // const size = window.getSize();
-            // vulkan.vertexBuffer.vertices[0].pos[0] = (2 * x / @as(f32, @floatFromInt(size.x))) - 1;
-            // vulkan.vertexBuffer.vertices[0].pos[1] = (2 * y / @as(f32, @floatFromInt(size.y))) - 1;
+            test_shape2.deinit();
+            var vertex_shape2 = [_]vulkan.vertex_buffer.Vertex{
+                vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 0, 0 }, .color = [4]f32{ 1, 1, 1, 1 } },
+                vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 500, 0 }, .color = [4]f32{ 1, 1, 1, 1 } },
+                vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 500, 500 }, .color = [4]f32{ 1, 1, 1, 1 } },
+                vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 500, 500 }, .color = [4]f32{ 1, 1, 1, 1 } },
+                vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 0, 500 }, .color = [4]f32{ 1, 1, 1, 1 } },
+                vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 0, 0 }, .color = [4]f32{ 1, 1, 1, 1 } },
+            };
 
-            // vulkan.vertexBuffer.vertices[1].pos[0] = (2 * x / @as(f32, @floatFromInt(size.x))) - 0.5;
-            // vulkan.vertexBuffer.vertices[1].pos[1] = (2 * y / @as(f32, @floatFromInt(size.y))) - 0;
+            for (&vertex_shape2) |*vertex| {
+                vertex.pos[0] += x;
+                vertex.pos[1] += y;
+            }
 
-            // vulkan.vertexBuffer.vertices[2].pos[0] = (2 * x / @as(f32, @floatFromInt(size.x))) - 1.5;
-            // vulkan.vertexBuffer.vertices[2].pos[1] = (2 * y / @as(f32, @floatFromInt(size.y))) - 0;
-
-            // try vulkan.vertexBuffer.createVertexBuffer();
+            try test_shape2.init(&vertex_shape2);
         },
         else => {},
     }
