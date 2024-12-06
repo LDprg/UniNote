@@ -1,6 +1,13 @@
+//! Event enum translates SDL3 events to a custom event
+
 const std = @import("std");
 
 const c = @import("root").c;
+
+/// Translate from SDL3 event to Event
+pub fn fromSDL(e: *const c.SDL_Event) Event {
+    return @as(Event, @enumFromInt(e.type));
+}
 
 pub const Event = enum(u32) {
     quit = c.SDL_EVENT_QUIT,

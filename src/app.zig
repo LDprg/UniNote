@@ -50,7 +50,7 @@ pub fn deinit() void {
 }
 
 pub fn processEvent(e: *const c.SDL_Event) !void {
-    switch (@as(event.Event, @enumFromInt(e.type))) {
+    switch (event.fromSDL(e)) {
         event.Event.quit => application.close(),
         event.Event.mouse_button_down, event.Event.pen_down => {
             x = e.ptouch.x;
