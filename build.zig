@@ -135,16 +135,12 @@ pub fn build(b: *std.Build) !void {
     const run_only_step = b.step("run-only", "Only run the app");
     run_only_step.dependOn(&run_cmd.step);
 
-    // docs
-
+    // generate docs
     const docs = b.addTest(.{
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
     });
-
-    const docs_step = b.step("docs", "Generate docs");
-    docs_step.dependOn(&docs.step);
 
     // copy resources
     const install_resources = b.addInstallDirectory(.{
@@ -173,5 +169,6 @@ pub fn build(b: *std.Build) !void {
         .install_dir = .prefix,
         .install_subdir = "docs",
     });
+    install_docs.step.dependOn(&docs.step);
     b.getInstallStep().dependOn(&install_docs.step);
 }
