@@ -1,5 +1,7 @@
 const std = @import("std");
 
+const zmath = @import("zmath");
+
 const c = @import("root").c;
 
 const device = @import("root").renderer.vulkan.device;
@@ -44,7 +46,7 @@ pub fn beginCommandBuffer(cb: c.VkCommandBuffer, image_index: u32) !void {
 
     try util.check_vk(c.vkBeginCommandBuffer(cb, &begin_info));
 
-    const clear_color = c.VkClearValue{ .color = .{ .float32 = [4]f32{ 0.0, 0.0, 0.0, 1.0 } } };
+    const clear_color = c.VkClearValue{ .color = .{ .float32 = zmath.f32x4(0.0, 0.0, 0.0, 1.0) } };
 
     const render_pass_info = c.VkRenderPassBeginInfo{
         .sType = c.VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,

@@ -2,6 +2,8 @@ const std = @import("std");
 
 const c = @import("root").c;
 
+const zmath = @import("zmath");
+
 const allocator = @import("root").renderer.vulkan.allocator;
 const command_buffer = @import("root").renderer.vulkan.command_buffer;
 const device = @import("root").renderer.vulkan.device;
@@ -14,8 +16,8 @@ const swapchain = @import("root").renderer.vulkan.swapchain;
 const util = @import("root").renderer.vulkan.util;
 
 pub const Vertex = struct {
-    pos: [2]f32,
-    color: [4]f32,
+    pos: zmath.F32x4,
+    color: zmath.F32x4,
 
     pub fn getBindingDescription() c.VkVertexInputBindingDescription {
         return c.VkVertexInputBindingDescription{

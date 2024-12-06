@@ -11,10 +11,10 @@ struct UniformInput {
 @binding(0) @group(0) var<uniform> UBO: UniformInput;
 
 @vertex
-fn main(@location(0) positions: vec2<f32>,
+fn main(@location(0) positions: vec4<f32>,
         @location(1) colors: vec4<f32>) -> VertexOutput {
     var output: VertexOutput;
-    output.position = UBO.view * UBO.model * vec4<f32>(positions, 0.0, 1.0);
+    output.position = UBO.view * UBO.model * positions;
     output.colors = colors;
     return output;
 }

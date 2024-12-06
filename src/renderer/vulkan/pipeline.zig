@@ -1,5 +1,7 @@
 const std = @import("std");
 
+const zmath = @import("zmath");
+
 const c = @import("root").c;
 
 const descriptor_set_layout = @import("root").renderer.vulkan.descriptor_set_layout;
@@ -105,7 +107,7 @@ pub fn init(alloc: std.mem.Allocator) !void {
         .logicOp = c.VK_LOGIC_OP_COPY,
         .attachmentCount = 1,
         .pAttachments = &color_blend_attachment,
-        .blendConstants = [4]f32{ 0.0, 0.0, 0.0, 0.0 },
+        .blendConstants = zmath.f32x4(0.0, 0.0, 0.0, 0.0),
     };
 
     const pipeline_layout_info = c.VkPipelineLayoutCreateInfo{

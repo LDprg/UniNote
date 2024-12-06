@@ -1,5 +1,7 @@
 const std = @import("std");
 
+const zmath = @import("zmath");
+
 const c = @import("root").c;
 
 const event = @import("root").core.event;
@@ -24,21 +26,21 @@ pub fn init(alloc_root: std.mem.Allocator) !void {
     alloc = alloc_root;
 
     var vertex_shape = [_]vulkan.vertex_buffer.Vertex{
-        vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 200, 200 }, .color = [4]f32{ 1, 0, 0, 1 } },
-        vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 700, 200 }, .color = [4]f32{ 0, 1, 0, 1 } },
-        vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 700, 700 }, .color = [4]f32{ 0, 0, 1, 1 } },
-        vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 200, 700 }, .color = [4]f32{ 1, 0, 1, 1 } },
+        vulkan.vertex_buffer.Vertex{ .pos = zmath.f32x4(200, 200, 0, 1), .color = zmath.f32x4(1, 0, 0, 1) },
+        vulkan.vertex_buffer.Vertex{ .pos = zmath.f32x4(700, 200, 0, 1), .color = zmath.f32x4(0, 1, 0, 1) },
+        vulkan.vertex_buffer.Vertex{ .pos = zmath.f32x4(700, 700, 0, 1), .color = zmath.f32x4(0, 0, 1, 1) },
+        vulkan.vertex_buffer.Vertex{ .pos = zmath.f32x4(200, 700, 0, 1), .color = zmath.f32x4(1, 0, 1, 1) },
     };
     var index_shape = [_]u16{ 0, 1, 2, 2, 3, 0 };
     try test_shape.init(&vertex_shape, &index_shape);
 
     var vertex_shape2 = [_]vulkan.vertex_buffer.Vertex{
-        vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 200, 200 }, .color = [4]f32{ 1, 1, 1, 1 } },
-        vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 700, 200 }, .color = [4]f32{ 1, 1, 1, 1 } },
-        vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 700, 700 }, .color = [4]f32{ 1, 1, 1, 1 } },
-        vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 700, 700 }, .color = [4]f32{ 1, 1, 1, 1 } },
-        vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 200, 700 }, .color = [4]f32{ 1, 1, 1, 1 } },
-        vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 200, 200 }, .color = [4]f32{ 1, 1, 1, 1 } },
+        vulkan.vertex_buffer.Vertex{ .pos = zmath.f32x4(200, 200, 0, 1), .color = zmath.f32x4(1, 1, 1, 1) },
+        vulkan.vertex_buffer.Vertex{ .pos = zmath.f32x4(700, 200, 0, 1), .color = zmath.f32x4(1, 1, 1, 1) },
+        vulkan.vertex_buffer.Vertex{ .pos = zmath.f32x4(700, 700, 0, 1), .color = zmath.f32x4(1, 1, 1, 1) },
+        vulkan.vertex_buffer.Vertex{ .pos = zmath.f32x4(700, 700, 0, 1), .color = zmath.f32x4(1, 1, 1, 1) },
+        vulkan.vertex_buffer.Vertex{ .pos = zmath.f32x4(200, 700, 0, 1), .color = zmath.f32x4(1, 1, 1, 1) },
+        vulkan.vertex_buffer.Vertex{ .pos = zmath.f32x4(200, 200, 0, 1), .color = zmath.f32x4(1, 1, 1, 1) },
     };
     try test_shape2.init(&vertex_shape2);
 }
@@ -51,18 +53,18 @@ pub fn deinit() void {
 pub fn processEvent(e: *const c.SDL_Event) !void {
     switch (@as(event.Event, @enumFromInt(e.type))) {
         event.Event.quit => application.close(),
-        event.Event.mouse_motion, event.Event.pen_motion => {
-            x = e.motion.x;
-            y = e.motion.y;
+        event.Event.mouse_button_down, event.Event.pen_down => {
+            x = e.ptouch.x;
+            y = e.ptouch.y;
 
             test_shape2.deinit();
             var vertex_shape2 = [_]vulkan.vertex_buffer.Vertex{
-                vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 0, 0 }, .color = [4]f32{ 1, 1, 1, 1 } },
-                vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 500, 0 }, .color = [4]f32{ 1, 1, 1, 1 } },
-                vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 500, 500 }, .color = [4]f32{ 1, 1, 1, 1 } },
-                vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 500, 500 }, .color = [4]f32{ 1, 1, 1, 1 } },
-                vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 0, 500 }, .color = [4]f32{ 1, 1, 1, 1 } },
-                vulkan.vertex_buffer.Vertex{ .pos = [2]f32{ 0, 0 }, .color = [4]f32{ 1, 1, 1, 1 } },
+                vulkan.vertex_buffer.Vertex{ .pos = zmath.f32x4(0, 0, 0, 1), .color = zmath.f32x4(1, 1, 1, 1) },
+                vulkan.vertex_buffer.Vertex{ .pos = zmath.f32x4(500, 0, 0, 1), .color = zmath.f32x4(1, 1, 1, 1) },
+                vulkan.vertex_buffer.Vertex{ .pos = zmath.f32x4(500, 500, 0, 1), .color = zmath.f32x4(1, 1, 1, 1) },
+                vulkan.vertex_buffer.Vertex{ .pos = zmath.f32x4(500, 500, 0, 1), .color = zmath.f32x4(1, 1, 1, 1) },
+                vulkan.vertex_buffer.Vertex{ .pos = zmath.f32x4(0, 500, 0, 1), .color = zmath.f32x4(1, 1, 1, 1) },
+                vulkan.vertex_buffer.Vertex{ .pos = zmath.f32x4(0, 0, 0, 1), .color = zmath.f32x4(1, 1, 1, 1) },
             };
 
             for (&vertex_shape2) |*vertex| {
