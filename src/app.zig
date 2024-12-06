@@ -1,3 +1,6 @@
+//! Main programm
+//! Here is the actual program doing stuff
+
 const std = @import("std");
 
 const zmath = @import("zmath");
@@ -13,6 +16,7 @@ const protobuf = @import("root").file.protobuf;
 const imgui = @import("root").renderer.imgui;
 const vulkan = @import("root").renderer.vulkan;
 const shape = @import("root").renderer.shape;
+const rectangle = @import("root").renderer.rectangle;
 
 var x: f32 = 0;
 var y: f32 = 0;
@@ -22,17 +26,12 @@ var alloc: std.mem.Allocator = undefined;
 var test_shape: shape.ShapeIndexed = undefined;
 var test_shape2: shape.Shape = undefined;
 
+var test_rectangle: rectangle.Rectangle = undefined;
+
 pub fn init(alloc_root: std.mem.Allocator) !void {
     alloc = alloc_root;
 
-    var vertex_shape = [_]vulkan.vertex_buffer.Vertex{
-        vulkan.vertex_buffer.Vertex{ .pos = zmath.f32x4(200, 200, 0, 1), .color = zmath.f32x4(1, 0, 0, 1) },
-        vulkan.vertex_buffer.Vertex{ .pos = zmath.f32x4(700, 200, 0, 1), .color = zmath.f32x4(0, 1, 0, 1) },
-        vulkan.vertex_buffer.Vertex{ .pos = zmath.f32x4(700, 700, 0, 1), .color = zmath.f32x4(0, 0, 1, 1) },
-        vulkan.vertex_buffer.Vertex{ .pos = zmath.f32x4(200, 700, 0, 1), .color = zmath.f32x4(1, 0, 1, 1) },
-    };
-    var index_shape = [_]u16{ 0, 1, 2, 2, 3, 0 };
-    try test_shape.init(&vertex_shape, &index_shape);
+    try test_rectangle.init(zmath.f32x4(500, 500, 0, 1), zmath.f32x4(200, 200, 0, 1), zmath.f32x4(1, 0, 0, 1));
 
     var vertex_shape2 = [_]vulkan.vertex_buffer.Vertex{
         vulkan.vertex_buffer.Vertex{ .pos = zmath.f32x4(200, 200, 0, 1), .color = zmath.f32x4(1, 1, 1, 1) },
@@ -46,7 +45,7 @@ pub fn init(alloc_root: std.mem.Allocator) !void {
 }
 
 pub fn deinit() void {
-    test_shape.deinit();
+    test_rectangle.deinit();
     test_shape2.deinit();
 }
 
@@ -100,6 +99,6 @@ pub fn update() !void {
 }
 
 pub fn draw() !void {
-    test_shape.draw();
+    test_rectangle.draw();
     test_shape2.draw();
 }

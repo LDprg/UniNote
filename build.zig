@@ -100,6 +100,7 @@ pub fn build(b: *std.Build) !void {
 
     b.installArtifact(exe);
 
+    // shader generator
     var gen_shader = try alloc.alloc(*std.Build.Step.Run, shader_files.len);
     defer alloc.free(gen_shader);
 
@@ -112,6 +113,7 @@ pub fn build(b: *std.Build) !void {
         });
     }
 
+    // generate all
     const gen_step = b.step("gen", "Generates shaders and protobuf");
 
     gen_step.dependOn(gen_proto);
@@ -119,6 +121,7 @@ pub fn build(b: *std.Build) !void {
         gen_step.dependOn(&shader.step);
     }
 
+    // run & run_only step
     const run_cmd = b.addRunArtifact(exe);
 
     if (b.args) |args| {
@@ -132,22 +135,43 @@ pub fn build(b: *std.Build) !void {
     const run_only_step = b.step("run-only", "Only run the app");
     run_only_step.dependOn(&run_cmd.step);
 
-    const resources = b.addInstallDirectory(.{
+    // docs
+
+    const docs = b.addTest(.{
+        .root_source_file = b.path("src/main.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+
+    const docs_step = b.step("docs", "Generate docs");
+    docs_step.dependOn(&docs.step);
+
+    // copy resources
+    const install_resources = b.addInstallDirectory(.{
         .include_extensions = &.{".ttf"},
         .source_dir = b.path("res"),
         .install_dir = .prefix,
         .install_subdir = "bin/res",
     });
-    b.getInstallStep().dependOn(&resources.step);
+    b.getInstallStep().dependOn(&install_resources.step);
 
-    const shaders = b.addInstallDirectory(.{
+    // copy compiled shaders
+    const install_shaders = b.addInstallDirectory(.{
         .include_extensions = &.{".spv"},
         .source_dir = b.path("shaders"),
         .install_dir = .prefix,
         .install_subdir = "bin/shaders",
     });
     for (gen_shader) |shader| {
-        shaders.step.dependOn(&shader.step);
+        install_shaders.step.dependOn(&shader.step);
     }
-    b.getInstallStep().dependOn(&shaders.step);
+    b.getInstallStep().dependOn(&install_shaders.step);
+
+    // copy docs
+    const install_docs = b.addInstallDirectory(.{
+        .source_dir = docs.getEmittedDocs(),
+        .install_dir = .prefix,
+        .install_subdir = "docs",
+    });
+    b.getInstallStep().dependOn(&install_docs.step);
 }

@@ -1,3 +1,9 @@
+//! this contains all c bindings:
+//! - Vulkan
+//! - VMA (Vulkan Memory Allocator)
+//! - SDL3
+//! - imgui (cimgui)
+
 const c = @cImport({
     @cInclude("vulkan/vulkan.h");
     @cInclude("vk_mem_alloc.h");

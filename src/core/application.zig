@@ -1,3 +1,6 @@
+//! Contains basic loop
+//! Mainly exists to keep app.zig cleaner
+
 const std = @import("std");
 
 const app = @import("root").app;

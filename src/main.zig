@@ -1,3 +1,5 @@
+//! root source file just all modules and the main loop
+
 const std = @import("std");
 
 pub const c = @import("c.zig");
@@ -8,6 +10,7 @@ pub const file = @import("file/file.zig");
 pub const renderer = @import("renderer/renderer.zig");
 pub const core = @import("core/core.zig");
 
+/// Main Loop
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer {
