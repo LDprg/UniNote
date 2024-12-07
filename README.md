@@ -8,3 +8,5 @@ This project is early into development so do not expect much out of it, but feel
 # WARNING
 DO NOT USE THIS SOFTWARE IN PRODUCTION AND NOT EVEN ALPHA QUALITY
 AND THERE IS NOTHING LIKE COMPATIBILITY EVEN BETWEEN MINOR VERSIONS
+
+This repository contains a lot of bad and dirty code, which will get some cleanups. Don't expect anything working for now!

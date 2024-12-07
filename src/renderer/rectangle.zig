@@ -39,6 +39,7 @@ pub const Rectangle = struct {
             vulkan.vertex_buffer.Vertex{ .pos = bottom_left, .color = self.color },
             vulkan.vertex_buffer.Vertex{ .pos = bottom_rigth, .color = self.color },
         };
+
         var indices = [_]u16{ 0, 1, 2, 2, 3, 0 };
 
         try self.shape.init(&vertices, &indices);
@@ -46,6 +47,26 @@ pub const Rectangle = struct {
 
     pub fn deinit(self: Rectangle) void {
         self.shape.deinit();
+    }
+
+    /// Update verticies (needed to apply any changes)
+    pub fn update(self: *Rectangle) !void {
+        const top_right = self.pos;
+        const top_left = zmath.mulAdd(zmath.f32x4(1, 0, 0, 0), self.size, self.pos);
+        const bottom_left = zmath.mulAdd(zmath.f32x4(1, 1, 0, 0), self.size, self.pos);
+        const bottom_rigth = zmath.mulAdd(zmath.f32x4(0, 1, 0, 0), self.size, self.pos);
+
+        var vertices = [_]vulkan.vertex_buffer.Vertex{
+            vulkan.vertex_buffer.Vertex{ .pos = top_right, .color = self.color },
+            vulkan.vertex_buffer.Vertex{ .pos = top_left, .color = self.color },
+            vulkan.vertex_buffer.Vertex{ .pos = bottom_left, .color = self.color },
+            vulkan.vertex_buffer.Vertex{ .pos = bottom_rigth, .color = self.color },
+        };
+
+        var indices = [_]u16{ 0, 1, 2, 2, 3, 0 };
+
+        self.shape.deinit();
+        try self.shape.init(&vertices, &indices);
     }
 
     pub fn draw(self: Rectangle) void {
