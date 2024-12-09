@@ -12,9 +12,9 @@ pub const c = @import("c.zig");
 
 pub const app = @import("app.zig");
 
+pub const core = @import("core/core.zig");
 pub const file = @import("file/file.zig");
 pub const renderer = @import("renderer/renderer.zig");
-pub const core = @import("core/core.zig");
 
 /// Main Loop
 pub fn main() !void {
@@ -25,6 +25,9 @@ pub fn main() !void {
     }
 
     const alloc = gpa.allocator();
+
+    // for Valgrind
+    // const alloc = std.heap.c_allocator;
 
     try core.application.run(alloc);
 }

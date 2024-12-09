@@ -10,3 +10,5 @@ src/proto
 /imgui.ini
 
 /shaders/*.spv
+
+bin/

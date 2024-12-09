@@ -3,6 +3,8 @@
 
 const std = @import("std");
 
+const c = @import("root").c;
+
 const app = @import("root").app;
 
 const window = @import("root").core.window;
@@ -36,7 +38,13 @@ pub fn run(alloc: std.mem.Allocator) !void {
         while (window.getEvent()) |e| {
             imgui.processEvent(&e);
 
-            try app.processEvent(&e);
+            if (e.type != c.SDL_EVENT_MOUSE_BUTTON_UP and
+                e.type != c.SDL_EVENT_MOUSE_BUTTON_DOWN and
+                e.type != c.SDL_EVENT_MOUSE_WHEEL or
+                !c.igGetIO().*.WantCaptureMouse)
+            {
+                try app.processEvent(&e);
+            }
         }
 
         imgui.update();

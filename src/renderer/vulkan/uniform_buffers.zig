@@ -19,13 +19,18 @@ pub fn init(alloc: std.mem.Allocator) !void {
     const buffer_size: c.VkDeviceSize = @sizeOf(UniformBufferObject);
 
     uniform_buffers = try alloc.alloc(vertex_buffer.Buffer, util.max_frames_in_fligth);
+    @memset(uniform_buffers, vertex_buffer.Buffer{
+        .buffer = null,
+        .buffer_alloc = null,
+        .buffer_alloc_info = c.VmaAllocationInfo{},
+    });
 
-    for (0..util.max_frames_in_fligth) |i| {
+    for (uniform_buffers) |*buffer| {
         try vertex_buffer.createBuffer(
             buffer_size,
             c.VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
             c.VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | c.VMA_ALLOCATION_CREATE_MAPPED_BIT,
-            &uniform_buffers[i],
+            buffer,
         );
     }
 }
