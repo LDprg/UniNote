@@ -8,6 +8,7 @@ const util = @import("root").renderer.vulkan.util;
 
 pub var instance: c.VkInstance = undefined;
 
+/// VK_LAYER_KHRONOS_validation can cause memory leaks be aware of this
 pub const layers: []const [*]const u8 = &.{
     "VK_LAYER_KHRONOS_validation",
 };

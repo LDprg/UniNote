@@ -16,12 +16,14 @@ pub const core = @import("core/core.zig");
 pub const file = @import("file/file.zig");
 pub const renderer = @import("renderer/renderer.zig");
 
+pub const std_options = core.log.std_options;
+
 /// Main Loop
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer {
         const check = gpa.deinit();
-        if (check == .leak) std.debug.panic("Leaks deteced!", .{});
+        if (check == .leak) std.log.err("Leaks deteced!", .{});
     }
 
     const alloc = gpa.allocator();

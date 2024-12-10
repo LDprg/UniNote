@@ -32,7 +32,7 @@ pub fn run(alloc: std.mem.Allocator) !void {
     try app.init(alloc);
     defer app.deinit();
 
-    std.debug.print("Staring Main Loop\n", .{});
+    std.log.info("Staring Main Loop", .{});
 
     while (is_running) {
         while (window.getEvent()) |e| {

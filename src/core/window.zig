@@ -12,16 +12,16 @@ pub const event = enum(u32) { quit = c.SDL_EVENT_QUIT };
 pub fn init(x: i32, y: i32) !void {
     _ = c.SDL_SetHint(c.SDL_HINT_VIDEO_DRIVER, "wayland,x11");
 
-    std.debug.print("Init SDL\n", .{});
+    std.log.info("Init SDL", .{});
 
     const sdl_init = c.SDL_Init(c.SDL_INIT_VIDEO);
 
     if (!sdl_init) {
-        std.debug.print("Could not init SDL3: {s}\n", .{c.SDL_GetError()});
+        std.log.err("Could not init SDL3: {s}", .{c.SDL_GetError()});
         return;
     }
 
-    std.debug.print("Init Window\n", .{});
+    std.log.debug("Init Window", .{});
 
     window = c.SDL_CreateWindow(
         "UniNote",
@@ -31,13 +31,13 @@ pub fn init(x: i32, y: i32) !void {
     );
 
     if (window == null) {
-        std.debug.print("Could not create window: {s}\n", .{c.SDL_GetError()});
+        std.log.err("Could not create window: {s}", .{c.SDL_GetError()});
         return;
     }
 }
 
 pub fn deinit() void {
-    std.debug.print("Deinit sdl\n", .{});
+    std.log.info("Deinit sdl", .{});
 
     c.SDL_DestroyWindow(window);
     c.SDL_Quit();

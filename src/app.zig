@@ -57,10 +57,10 @@ pub fn update() !void {
             defer c.igEndMenu();
 
             if (c.igMenuItem_Bool("Save", "", false, true)) {
-                std.debug.print("Save: {}\n", .{vulkan.swapchain.extent});
+                std.log.debug("Save: {}", .{vulkan.swapchain.extent});
             }
             if (c.igMenuItem_Bool("Open", "", false, true)) {
-                std.debug.print("Open\n", .{});
+                std.log.debug("Open", .{});
             }
         }
     }

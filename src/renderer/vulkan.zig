@@ -37,7 +37,7 @@ var arena_state: std.heap.ArenaAllocator = undefined;
 var arena: std.mem.Allocator = undefined;
 
 pub fn init(alloc: std.mem.Allocator) !void {
-    std.debug.print("Init Vulkan\n", .{});
+    std.log.info("Init Vulkan", .{});
 
     arena_state = std.heap.ArenaAllocator.init(alloc);
     arena = arena_state.allocator();
@@ -64,7 +64,7 @@ pub fn init(alloc: std.mem.Allocator) !void {
 }
 
 pub fn deinit() void {
-    std.debug.print("Deinit Vulkan\n", .{});
+    std.log.info("Deinit Vulkan", .{});
     _ = c.vkDeviceWaitIdle(device.device);
 
     descriptor_pool.deinit();

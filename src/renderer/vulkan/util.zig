@@ -6,7 +6,7 @@ pub const max_frames_in_fligth = 2;
 
 pub fn check_vk_c(result: c.VkResult) callconv(.C) void {
     check_vk(result) catch |err| {
-        std.debug.panic("VK ERROR: {}", .{err});
+        std.log.err("VK ERROR: {}", .{err});
     };
 }
 

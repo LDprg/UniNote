@@ -12,12 +12,12 @@ var pipeline_cache: c.VkPipelineCache = undefined;
 var descriptor_pool: c.VkDescriptorPool = undefined;
 
 pub fn init() !void {
-    std.debug.print("Init Imgui\n", .{});
+    std.log.info("Init Imgui", .{});
 
     context = c.igCreateContext(null);
 
     if (context == null) {
-        std.debug.print("Could not create context!\n", .{});
+        std.log.err("Could not create context!", .{});
         return;
     }
 
@@ -91,7 +91,7 @@ pub fn init() !void {
 }
 
 pub fn deinit() void {
-    std.debug.print("Deinit imgui\n", .{});
+    std.log.info("Deinit imgui", .{});
     _ = c.vkDeviceWaitIdle(vulkan.device.device);
 
     _ = c.ImGui_ImplVulkan_DestroyFontsTexture();
