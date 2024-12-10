@@ -1,6 +1,14 @@
 const std = @import("std");
+const builtin = @import("builtin");
+
+pub const default_level: std.log.Level = switch (builtin.mode) {
+    .Debug => .debug,
+    .ReleaseSafe => .info,
+    .ReleaseFast, .ReleaseSmall => .err,
+};
 
 pub const std_options = .{
+    .log_level = default_level,
     .logFn = customLogFn,
 };
 

@@ -33,34 +33,34 @@ pub var current_frame: u32 = 0;
 
 pub var swapchain_rebuild = false;
 
-var arena_state: std.heap.ArenaAllocator = undefined;
-var arena: std.mem.Allocator = undefined;
+var alloc_arena: std.heap.ArenaAllocator = undefined;
+var alloc: std.mem.Allocator = undefined;
 
-pub fn init(alloc: std.mem.Allocator) !void {
+pub fn init(alloc_root: std.mem.Allocator) !void {
     std.log.info("Init Vulkan", .{});
 
-    arena_state = std.heap.ArenaAllocator.init(alloc);
-    arena = arena_state.allocator();
+    alloc_arena = std.heap.ArenaAllocator.init(alloc_root);
+    alloc = alloc_arena.allocator();
 
     try instance.init();
     try surface.init();
-    try physical_device.init(arena);
-    try queue_family.init(arena);
-    try device.init(arena);
+    try physical_device.init(alloc);
+    try queue_family.init(alloc);
+    try device.init(alloc);
     try allocator.init();
     try queue.init();
-    try swapchain.init(arena);
-    try image_view.init(arena);
+    try swapchain.init(alloc);
+    try image_view.init(alloc);
     try render_pass.init();
-    try shaders.init(arena);
+    try shaders.init(alloc);
     try descriptor_set_layout.init();
-    try pipeline.init(arena);
-    try frame_buffer.init(arena);
+    try pipeline.init(alloc);
+    try frame_buffer.init(alloc);
     try command_buffer.init();
     try sync_objects.init();
-    try uniform_buffers.init(arena);
+    try uniform_buffers.init(alloc);
     try descriptor_pool.init();
-    try descriptor_sets.init(arena);
+    try descriptor_sets.init(alloc);
 }
 
 pub fn deinit() void {
@@ -83,19 +83,20 @@ pub fn deinit() void {
     surface.deinit();
     instance.deinit();
 
-    arena_state.deinit();
+    alloc_arena.deinit();
 }
 
 pub fn rebuildSwapChain() !void {
+    std.log.debug("Rebuild Swapchain", .{});
     try util.check_vk(c.vkDeviceWaitIdle(device.device));
 
     frame_buffer.deinit();
     image_view.deinit();
     swapchain.deinit();
 
-    try swapchain.init(arena);
-    try image_view.init(arena);
-    try frame_buffer.init(arena);
+    try swapchain.init(alloc);
+    try image_view.init(alloc);
+    try frame_buffer.init(alloc);
 
     swapchain_rebuild = false;
 }

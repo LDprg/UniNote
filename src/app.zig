@@ -26,12 +26,16 @@ var alloc: std.mem.Allocator = undefined;
 var test_rectangle: rectangle.Rectangle = undefined;
 
 pub fn init(alloc_root: std.mem.Allocator) !void {
+    std.log.info("Init app", .{});
+
     alloc = alloc_root;
 
     try test_rectangle.init(zmath.f32x4(500, 500, 0, 1), zmath.f32x4(200, 200, 0, 1), zmath.f32x4(1, 0, 0, 1));
 }
 
 pub fn deinit() void {
+    std.log.info("Deinit app", .{});
+
     test_rectangle.deinit();
 }
 

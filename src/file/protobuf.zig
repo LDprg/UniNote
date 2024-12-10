@@ -5,6 +5,8 @@ const protobuf = @import("protobuf");
 const test_pb = @import("proto/test.pb.zig");
 
 pub fn init(alloc: std.mem.Allocator) !void {
+    std.log.info("Init protobuf", .{});
+
     const file = try std.fs.cwd().createFile(
         "test.bin",
         .{ .read = true },
@@ -34,4 +36,6 @@ pub fn init(alloc: std.mem.Allocator) !void {
     try comp.finish();
 }
 
-pub fn deinit() void {}
+pub fn deinit() void {
+    std.log.info("Deinit protobuf", .{});
+}

@@ -32,7 +32,8 @@ pub fn run(alloc: std.mem.Allocator) !void {
     try app.init(alloc);
     defer app.deinit();
 
-    std.log.info("Staring Main Loop", .{});
+    std.log.info("Running Main Loop", .{});
+    defer std.log.info("Stopping Main Loop", .{});
 
     while (is_running) {
         while (window.getEvent()) |e| {
@@ -66,5 +67,6 @@ pub fn run(alloc: std.mem.Allocator) !void {
 }
 
 pub fn close() void {
+    std.log.warn("Closing requested!", .{});
     is_running = false;
 }

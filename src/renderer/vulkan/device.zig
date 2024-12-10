@@ -13,7 +13,6 @@ pub var device: c.VkDevice = undefined;
 
 pub var extensions: []const ?[*]const u8 = &.{
     c.VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-    c.VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
 };
 
 var alloc: std.mem.Allocator = undefined;
@@ -40,6 +39,11 @@ pub fn init(alloc_root: std.mem.Allocator) !void {
     }
 
     const device_features = c.VkPhysicalDeviceFeatures{};
+
+    std.log.debug("Vulkan device extensions:", .{});
+    for (extensions) |extension| {
+        std.log.debug("- {s}", .{extension.?[0..c.strlen(extension)]});
+    }
 
     const create_info = c.VkDeviceCreateInfo{
         .sType = c.VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
