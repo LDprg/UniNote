@@ -14,6 +14,7 @@ const swapchain = vulkan.swapchain;
 const vertex_buffer = vulkan.vertex_buffer;
 
 pub const InstanceData = struct {
+    model: zmath.Mat,
     color: zmath.F32x4,
 
     pub fn getBindingDescription() c.VkVertexInputBindingDescription {
@@ -24,10 +25,19 @@ pub const InstanceData = struct {
         };
     }
     pub fn getAttributeDescriptions(alloc: std.mem.Allocator) ![]c.VkVertexInputAttributeDescription {
-        const attribute_descriptions = try alloc.alloc(c.VkVertexInputAttributeDescription, 1);
-        attribute_descriptions[0] = .{
+        const attribute_descriptions = try alloc.alloc(c.VkVertexInputAttributeDescription, 5);
+        for (0..4) |i| {
+            attribute_descriptions[i] = .{
+                .binding = 1,
+                .location = 10 + @as(u32, @intCast(i)),
+                .format = c.VK_FORMAT_R32G32B32A32_SFLOAT,
+                .offset = @offsetOf(InstanceData, "model") + @as(u32, @intCast(i)) * @sizeOf(zmath.F32x4),
+            };
+        }
+
+        attribute_descriptions[4] = .{
             .binding = 1,
-            .location = 1,
+            .location = 15,
             .format = c.VK_FORMAT_R32G32B32A32_SFLOAT,
             .offset = @offsetOf(InstanceData, "color"),
         };

@@ -54,21 +54,22 @@ pub const Rectangle = struct {
     }
 
     fn genShape(self: *Rectangle) !void {
-        const top_right = self.pos;
-        const top_left = zmath.mulAdd(zmath.f32x4(1, 0, 0, 0), self.size, self.pos);
-        const bottom_left = zmath.mulAdd(zmath.f32x4(1, 1, 0, 0), self.size, self.pos);
-        const bottom_rigth = zmath.mulAdd(zmath.f32x4(0, 1, 0, 0), self.size, self.pos);
-
         var vertices = [_]vulkan.vertex_buffer.Vertex{
-            vulkan.vertex_buffer.Vertex{ .pos = top_right },
-            vulkan.vertex_buffer.Vertex{ .pos = top_left },
-            vulkan.vertex_buffer.Vertex{ .pos = bottom_left },
-            vulkan.vertex_buffer.Vertex{ .pos = bottom_rigth },
+            vulkan.vertex_buffer.Vertex{ .pos = zmath.f32x4(-0.5, -0.5, 0, 1) },
+            vulkan.vertex_buffer.Vertex{ .pos = zmath.f32x4(0.5, -0.5, 0, 1) },
+            vulkan.vertex_buffer.Vertex{ .pos = zmath.f32x4(0.5, 0.5, 0, 1) },
+            vulkan.vertex_buffer.Vertex{ .pos = zmath.f32x4(-0.5, 0.5, 0, 1) },
         };
 
         var indices = [_]u16{ 0, 1, 2, 2, 3, 0 };
 
+        var model = zmath.identity();
+        model = zmath.mul(model, zmath.scalingV(self.size));
+        // model = zmath.mul(model, zmath.rotationZ(std.math.pi / 4.0));
+        model = zmath.mul(model, zmath.translationV(self.pos));
+        model = zmath.mul(model, zmath.translationV(self.size / zmath.f32x4s(2)));
         var instance = shape.InstanceData{
+            .model = model,
             .color = self.color,
         };
 

@@ -50,32 +50,32 @@ pub fn processEvent(e: *const c.SDL_Event) !void {
             x = e.ptouch.x;
             y = e.ptouch.y;
 
-            // test_line.p2 = zmath.f32x4(x, y, 0, 1);
-            // try test_line.update();
-            test_rectangle.pos = zmath.f32x4(x, y, 0, 1);
-            try test_rectangle.update();
+            test_line.p2 = zmath.f32x4(x, y, 0, 1);
+            try test_line.update();
+            // test_rectangle.pos = zmath.f32x4(x, y, 0, 1);
+            // try test_rectangle.update();
         },
         else => {},
     }
 }
 
 pub fn update() !void {
-    if (c.igBeginMainMenuBar()) {
-        defer c.igEndMainMenuBar();
+    // if (c.igBeginMainMenuBar()) {
+    //     defer c.igEndMainMenuBar();
 
-        if (c.igBeginMenu("File", true)) {
-            defer c.igEndMenu();
+    //     if (c.igBeginMenu("File", true)) {
+    //         defer c.igEndMenu();
 
-            if (c.igMenuItem_Bool("Save", "", false, true)) {
-                std.log.debug("Save: {}", .{vulkan.swapchain.extent});
-            }
-            if (c.igMenuItem_Bool("Open", "", false, true)) {
-                std.log.debug("Open", .{});
-            }
-        }
-    }
+    //         if (c.igMenuItem_Bool("Save", "", false, true)) {
+    //             std.log.debug("Save: {}", .{vulkan.swapchain.extent});
+    //         }
+    //         if (c.igMenuItem_Bool("Open", "", false, true)) {
+    //             std.log.debug("Open", .{});
+    //         }
+    //     }
+    // }
 
-    c.igShowDemoWindow(null);
+    // c.igShowDemoWindow(null);
 }
 
 pub fn draw() !void {
