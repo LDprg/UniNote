@@ -28,21 +28,7 @@ pub const Rectangle = struct {
         self.pos = pos;
         self.color = color;
 
-        const top_right = self.pos;
-        const top_left = zmath.mulAdd(zmath.f32x4(1, 0, 0, 0), self.size, self.pos);
-        const bottom_left = zmath.mulAdd(zmath.f32x4(1, 1, 0, 0), self.size, self.pos);
-        const bottom_rigth = zmath.mulAdd(zmath.f32x4(0, 1, 0, 0), self.size, self.pos);
-
-        var vertices = [_]vulkan.vertex_buffer.Vertex{
-            vulkan.vertex_buffer.Vertex{ .pos = top_right, .color = self.color },
-            vulkan.vertex_buffer.Vertex{ .pos = top_left, .color = self.color },
-            vulkan.vertex_buffer.Vertex{ .pos = bottom_left, .color = self.color },
-            vulkan.vertex_buffer.Vertex{ .pos = bottom_rigth, .color = self.color },
-        };
-
-        var indices = [_]u16{ 0, 1, 2, 2, 3, 0 };
-
-        try self.shape.init(&vertices, &indices);
+        try self.genShape();
     }
 
     pub fn deinit(self: Rectangle) void {
@@ -51,6 +37,15 @@ pub const Rectangle = struct {
 
     /// Update verticies (needed to apply any changes)
     pub fn update(self: *Rectangle) !void {
+        self.shape.deinit();
+        try self.genShape();
+    }
+
+    pub fn draw(self: Rectangle) void {
+        self.shape.draw();
+    }
+
+    fn genShape(self: *Rectangle) !void {
         const top_right = self.pos;
         const top_left = zmath.mulAdd(zmath.f32x4(1, 0, 0, 0), self.size, self.pos);
         const bottom_left = zmath.mulAdd(zmath.f32x4(1, 1, 0, 0), self.size, self.pos);
@@ -65,11 +60,6 @@ pub const Rectangle = struct {
 
         var indices = [_]u16{ 0, 1, 2, 2, 3, 0 };
 
-        self.shape.deinit();
         try self.shape.init(&vertices, &indices);
-    }
-
-    pub fn draw(self: Rectangle) void {
-        self.shape.draw();
     }
 };
