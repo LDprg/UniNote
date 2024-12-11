@@ -105,8 +105,8 @@ pub fn build(b: *std.Build) !void {
     defer alloc.free(gen_shader);
 
     for (shader_files, 0..) |file, i| {
-        gen_shader[i] = b.addSystemCommand(&.{"naga"});
-        gen_shader[i].addArgs(&.{
+        gen_shader[i] = b.addSystemCommand(&.{
+            "naga",
             b.fmt("{s}.wgsl", .{file}),
             b.fmt("{s}.spv", .{file}),
             "--keep-coordinate-space",
