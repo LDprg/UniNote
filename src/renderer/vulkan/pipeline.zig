@@ -12,7 +12,7 @@ const swapchain = @import("root").renderer.vulkan.swapchain;
 const util = @import("root").renderer.vulkan.util;
 const vertex_buffer = @import("root").renderer.vulkan.vertex_buffer;
 
-const rectangle = @import("root").renderer.rectangle;
+const shape = @import("root").renderer.shape;
 
 const dynamic_states: []const c.VkDynamicState = &.{
     c.VK_DYNAMIC_STATE_VIEWPORT,
@@ -23,10 +23,10 @@ pub var pipeline_layout: c.VkPipelineLayout = null;
 pub var graphics_pipeline: c.VkPipeline = null;
 
 pub fn init(alloc: std.mem.Allocator) !void {
-    const binding_descriptions = [_]c.VkVertexInputBindingDescription{ vertex_buffer.Vertex.getBindingDescription(), rectangle.InstanceData.getBindingDescription() };
+    const binding_descriptions = [_]c.VkVertexInputBindingDescription{ vertex_buffer.Vertex.getBindingDescription(), shape.InstanceData.getBindingDescription() };
 
     const vertex = try vertex_buffer.Vertex.getAttributeDescriptions(alloc);
-    const instance = try rectangle.InstanceData.getAttributeDescriptions(alloc);
+    const instance = try shape.InstanceData.getAttributeDescriptions(alloc);
 
     var attribute_descriptions = try alloc.alloc(c.VkVertexInputAttributeDescription, vertex.len + instance.len);
     @memcpy(attribute_descriptions[0..vertex.len], vertex);

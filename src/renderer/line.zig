@@ -48,6 +48,10 @@ pub const Line = struct {
 
         var indices = [_]u16{ 0, 1, 2, 2, 3, 0 };
 
-        try self.shape.init(&vertices, &indices);
+        var instance = shape.InstanceData{
+            .color = self.color,
+        };
+
+        try self.shape.init(&vertices, &indices, &instance);
     }
 };

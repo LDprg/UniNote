@@ -1,3 +1,6 @@
+const std = @import("std");
+const zmath = @import("zmath");
+
 const c = @import("root").c;
 
 const vulkan = @import("root").renderer.vulkan;
@@ -10,36 +13,77 @@ const pipeline = vulkan.pipeline;
 const swapchain = vulkan.swapchain;
 const vertex_buffer = vulkan.vertex_buffer;
 
+pub const InstanceData = struct {
+    color: zmath.F32x4,
+
+    pub fn getBindingDescription() c.VkVertexInputBindingDescription {
+        return c.VkVertexInputBindingDescription{
+            .binding = 1,
+            .stride = @sizeOf(InstanceData),
+            .inputRate = c.VK_VERTEX_INPUT_RATE_INSTANCE,
+        };
+    }
+    pub fn getAttributeDescriptions(alloc: std.mem.Allocator) ![]c.VkVertexInputAttributeDescription {
+        const attribute_descriptions = try alloc.alloc(c.VkVertexInputAttributeDescription, 1);
+        attribute_descriptions[0] = .{
+            .binding = 1,
+            .location = 1,
+            .format = c.VK_FORMAT_R32G32B32A32_SFLOAT,
+            .offset = @offsetOf(InstanceData, "color"),
+        };
+
+        return attribute_descriptions;
+    }
+};
+
 pub const ShapeIndexed = struct {
-    vertices: []vertex_buffer.Vertex,
+    instance: *InstanceData,
     indices: []u16,
-    vertex_buffer: vertex_buffer.Buffer,
+    vertices: []vertex_buffer.Vertex,
+
     index_buffer: vertex_buffer.Buffer,
+    instance_buffer: vertex_buffer.Buffer,
+    vertex_buffer: vertex_buffer.Buffer,
 
-    pub fn init(self: *ShapeIndexed, vertices: []vertex_buffer.Vertex, indices: []u16) !void {
-        self.vertices = vertices;
+    pub fn init(self: *ShapeIndexed, vertices: []vertex_buffer.Vertex, indices: []u16, instance: *InstanceData) !void {
         self.indices = indices;
+        self.instance = instance;
+        self.vertices = vertices;
 
-        try vertex_buffer.createBufferStaging(&self.vertex_buffer, vertex_buffer.Vertex, self.vertices, c.VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+        var inst = [_]InstanceData{self.instance.*};
+        try vertex_buffer.createBufferStaging(&self.instance_buffer, InstanceData, &inst, c.VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+
         try vertex_buffer.createBufferStaging(&self.index_buffer, u16, self.indices, c.VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+        try vertex_buffer.createBufferStaging(&self.vertex_buffer, vertex_buffer.Vertex, self.vertices, c.VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
     }
 
     pub fn deinit(self: ShapeIndexed) void {
         _ = c.vkDeviceWaitIdle(device.device);
 
+        c.vmaDestroyBuffer(allocator.allocator, self.instance_buffer.buffer, self.instance_buffer.buffer_alloc);
         c.vmaDestroyBuffer(allocator.allocator, self.vertex_buffer.buffer, self.vertex_buffer.buffer_alloc);
         c.vmaDestroyBuffer(allocator.allocator, self.index_buffer.buffer, self.index_buffer.buffer_alloc);
     }
 
     pub fn draw(self: ShapeIndexed) void {
         if (!vulkan.swapchain_rebuild) {
-            const vertex_buffers: [*]const c.VkBuffer = &.{self.vertex_buffer.buffer};
             const offsets: [*]const c.VkDeviceSize = &.{0};
+
+            const vertex_buffers: [*]const c.VkBuffer = &.{self.vertex_buffer.buffer};
             c.vkCmdBindVertexBuffers(
                 command_buffer.command_buffers[vulkan.current_frame],
                 0,
                 1,
                 vertex_buffers,
+                offsets,
+            );
+
+            const instance_buffers: [*]const c.VkBuffer = &.{self.instance_buffer.buffer};
+            c.vkCmdBindVertexBuffers(
+                command_buffer.command_buffers[vulkan.current_frame],
+                1,
+                1,
+                instance_buffers,
                 offsets,
             );
 
