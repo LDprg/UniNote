@@ -50,8 +50,10 @@ pub fn processEvent(e: *const c.SDL_Event) !void {
             x = e.ptouch.x;
             y = e.ptouch.y;
 
-            test_line.p2 = zmath.f32x4(x, y, 0, 1);
-            try test_line.update();
+            // test_line.p2 = zmath.f32x4(x, y, 0, 1);
+            // try test_line.update();
+            test_rectangle.pos = zmath.f32x4(x, y, 0, 1);
+            try test_rectangle.update();
         },
         else => {},
     }
