@@ -4,7 +4,6 @@ struct VertexOutput {
 }
 
 struct UniformInput {
-    model: mat4x4<f32>,
     view: mat4x4<f32>,
 }
 
@@ -12,9 +11,10 @@ struct UniformInput {
 
 @vertex
 fn main(@location(0) positions: vec4<f32>,
-        @location(1) colors: vec4<f32>) -> VertexOutput {
+        @location(1) colors: vec4<f32>
+        ) -> VertexOutput {
     var output: VertexOutput;
-    output.position = UBO.view * UBO.model * positions;
+    output.position = UBO.view * positions;
     output.colors = colors;
     return output;
 }

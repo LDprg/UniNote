@@ -9,7 +9,6 @@ const util = @import("root").renderer.vulkan.util;
 const vertex_buffer = @import("root").renderer.vulkan.vertex_buffer;
 
 pub const UniformBufferObject = struct {
-    model: zmath.Mat,
     view: zmath.Mat,
 };
 

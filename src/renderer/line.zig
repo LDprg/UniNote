@@ -40,10 +40,10 @@ pub const Line = struct {
         const direction = zmath.normalize2(self.p2 - self.p1);
         const perp = zmath.f32x4s(self.thickness / 2) * zmath.f32x4(-direction[1], direction[0], direction[2], 0);
         var vertices = [_]vulkan.vertex_buffer.Vertex{
-            vulkan.vertex_buffer.Vertex{ .pos = self.p1 + perp, .color = self.color },
-            vulkan.vertex_buffer.Vertex{ .pos = self.p1 - perp, .color = self.color },
-            vulkan.vertex_buffer.Vertex{ .pos = self.p2 - perp, .color = self.color },
-            vulkan.vertex_buffer.Vertex{ .pos = self.p2 + perp, .color = self.color },
+            vulkan.vertex_buffer.Vertex{ .pos = self.p1 + perp },
+            vulkan.vertex_buffer.Vertex{ .pos = self.p1 - perp },
+            vulkan.vertex_buffer.Vertex{ .pos = self.p2 - perp },
+            vulkan.vertex_buffer.Vertex{ .pos = self.p2 + perp },
         };
 
         var indices = [_]u16{ 0, 1, 2, 2, 3, 0 };

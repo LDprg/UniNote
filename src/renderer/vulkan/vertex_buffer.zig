@@ -17,7 +17,6 @@ const util = @import("root").renderer.vulkan.util;
 
 pub const Vertex = struct {
     pos: zmath.F32x4,
-    color: zmath.F32x4,
 
     pub fn getBindingDescription() c.VkVertexInputBindingDescription {
         return c.VkVertexInputBindingDescription{
@@ -27,18 +26,12 @@ pub const Vertex = struct {
         };
     }
     pub fn getAttributeDescriptions(alloc: std.mem.Allocator) ![]c.VkVertexInputAttributeDescription {
-        const attribute_descriptions = try alloc.alloc(c.VkVertexInputAttributeDescription, 2);
+        const attribute_descriptions = try alloc.alloc(c.VkVertexInputAttributeDescription, 1);
         attribute_descriptions[0] = .{
             .binding = 0,
             .location = 0,
-            .format = c.VK_FORMAT_R32G32_SFLOAT,
-            .offset = @offsetOf(Vertex, "pos"),
-        };
-        attribute_descriptions[1] = .{
-            .binding = 0,
-            .location = 1,
             .format = c.VK_FORMAT_R32G32B32A32_SFLOAT,
-            .offset = @offsetOf(Vertex, "color"),
+            .offset = @offsetOf(Vertex, "pos"),
         };
 
         return attribute_descriptions;

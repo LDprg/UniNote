@@ -139,7 +139,6 @@ pub fn draw() !void {
     const view = zmath.mul(zmath.mul(zmath.identity(), zmath.scaling(w, h, 1)), zmath.translation(-1, -1, 0));
 
     var ubo = [_]uniform_buffers.UniformBufferObject{uniform_buffers.UniformBufferObject{
-        .model = zmath.identity(),
         .view = view,
     }};
 

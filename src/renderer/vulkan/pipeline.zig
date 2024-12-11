@@ -12,6 +12,8 @@ const swapchain = @import("root").renderer.vulkan.swapchain;
 const util = @import("root").renderer.vulkan.util;
 const vertex_buffer = @import("root").renderer.vulkan.vertex_buffer;
 
+const rectangle = @import("root").renderer.rectangle;
+
 const dynamic_states: []const c.VkDynamicState = &.{
     c.VK_DYNAMIC_STATE_VIEWPORT,
     c.VK_DYNAMIC_STATE_SCISSOR,
@@ -21,14 +23,20 @@ pub var pipeline_layout: c.VkPipelineLayout = null;
 pub var graphics_pipeline: c.VkPipeline = null;
 
 pub fn init(alloc: std.mem.Allocator) !void {
-    const binding_description = vertex_buffer.Vertex.getBindingDescription();
-    const attribute_descriptions = try vertex_buffer.Vertex.getAttributeDescriptions(alloc);
+    const binding_descriptions = [_]c.VkVertexInputBindingDescription{ vertex_buffer.Vertex.getBindingDescription(), rectangle.InstanceData.getBindingDescription() };
+
+    const vertex = try vertex_buffer.Vertex.getAttributeDescriptions(alloc);
+    const instance = try rectangle.InstanceData.getAttributeDescriptions(alloc);
+
+    var attribute_descriptions = try alloc.alloc(c.VkVertexInputAttributeDescription, vertex.len + instance.len);
+    @memcpy(attribute_descriptions[0..vertex.len], vertex);
+    @memcpy(attribute_descriptions[vertex.len..], instance);
 
     const vertex_input_info = c.VkPipelineVertexInputStateCreateInfo{
         .sType = c.VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
-        .vertexBindingDescriptionCount = 1,
+        .vertexBindingDescriptionCount = @intCast(binding_descriptions.len),
         .vertexAttributeDescriptionCount = @intCast(attribute_descriptions.len),
-        .pVertexBindingDescriptions = &binding_description,
+        .pVertexBindingDescriptions = &binding_descriptions,
         .pVertexAttributeDescriptions = attribute_descriptions.ptr,
     };
 
